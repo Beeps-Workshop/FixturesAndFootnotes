@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "<replace with your mod description>",
+  "authors": ["Beeps"],
+  "license": "ARR",
+  "environment": "*",
+  "icon": "assets/fixfoot/icon.png",
+  "entrypoints": {
+    "main": ["com.beepsterr.fixfoot.fabric.FixfootFabric"],
+    "client": ["com.beepsterr.fixfoot.fabric.client.FixfootFabricClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16",
+    "minecraft": "${minecraft}",
+    "fabric-api": "*",
+    "architectury": "*"
+  }
+}
