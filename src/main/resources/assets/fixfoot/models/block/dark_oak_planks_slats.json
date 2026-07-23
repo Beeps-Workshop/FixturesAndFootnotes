@@ -1,0 +1,6 @@
+{
+  "parent": "fixfoot:block/slats_base",
+  "textures": {
+    "0": "minecraft:block/dark_oak_planks"
+  }
+}

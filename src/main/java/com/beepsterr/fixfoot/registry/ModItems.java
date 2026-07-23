@@ -1,21 +1,16 @@
 package com.beepsterr.fixfoot.registry;
 
 import com.beepsterr.fixfoot.Fixfoot;
+import com.beepsterr.fixfoot.content.SlatVariants;
 import com.beepsterr.fixfoot.item.SlatsItem;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 
-/**
- * Item registry — mostly {@link BlockItem}s for the deco blocks.
- *
- * <p>NOTE (version seam): 1.21.2+ requires the item's registry id to be set on
- * {@code Item.Properties} at construction ({@code new Item.Properties().setId(key)}).
- * On 1.21.1 (the active dev version) the bare constructor is correct. When 1.21.4 is
- * activated this line needs a Stonecutter conditional to supply the id.
- */
 public final class ModItems {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(Fixfoot.MOD_ID, Registries.ITEM);
@@ -24,10 +19,16 @@ public final class ModItems {
             "display_fixture",
             () -> new BlockItem(ModBlocks.DISPLAY_FIXTURE.get(), new Item.Properties()));
 
-    // One item places both forms: multiface slats on a wall face, the standing screen on a floor.
-    public static final RegistrySupplier<Item> OAK_SLATS = ITEMS.register(
-            "oak_slats",
-            () -> new SlatsItem(ModBlocks.OAK_SLATS.get(), ModBlocks.OAK_SLAT_SCREEN.get(), new Item.Properties()));
+    // One item per variant — places wall slats on a wall face, the standing screen on a floor.
+    public static final Map<String, RegistrySupplier<Item>> SLAT_ITEMS = new LinkedHashMap<>();
+
+    static {
+        for (String key : SlatVariants.KEYS) {
+            SLAT_ITEMS.put(key, ITEMS.register(key + "_slats",
+                    () -> new SlatsItem(ModBlocks.WALL.get(key).get(), ModBlocks.SCREEN.get(key).get(),
+                            new Item.Properties())));
+        }
+    }
 
     private ModItems() {
     }

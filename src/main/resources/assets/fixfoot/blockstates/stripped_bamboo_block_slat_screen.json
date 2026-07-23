@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "fixfoot:block/stripped_bamboo_block_slat_screen"
+    },
+    "axis=z": {
+      "model": "fixfoot:block/stripped_bamboo_block_slat_screen",
+      "y": 90
+    }
+  }
+}

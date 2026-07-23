@@ -1,7 +1,8 @@
 package com.beepsterr.fixfoot.block;
 
-import com.beepsterr.fixfoot.registry.ModItems;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.core.BlockPos;
@@ -59,7 +60,10 @@ public class SlatScreenBlock extends Block {
 
     @Override
     public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
-        // Screen has no item of its own — pick-block yields the unified slats item.
-        return new ItemStack(ModItems.OAK_SLATS.get());
+        // Screen shares the wall slats' item — derive it from this block's id (…_slat_screen → …_slats).
+        ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(this);
+        ResourceLocation itemId = ResourceLocation.fromNamespaceAndPath(
+                blockId.getNamespace(), blockId.getPath().replace("_slat_screen", "_slats"));
+        return new ItemStack(BuiltInRegistries.ITEM.get(itemId));
     }
 }

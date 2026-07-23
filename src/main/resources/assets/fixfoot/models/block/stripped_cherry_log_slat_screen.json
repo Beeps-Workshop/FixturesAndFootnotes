@@ -1,0 +1,6 @@
+{
+  "parent": "fixfoot:block/slat_screen_base",
+  "textures": {
+    "0": "minecraft:block/stripped_cherry_log"
+  }
+}

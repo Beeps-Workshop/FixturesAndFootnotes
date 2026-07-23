@@ -1,0 +1,78 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "fixfoot:block/mangrove_planks_slats"
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "fixfoot:block/mangrove_planks_slats",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "fixfoot:block/mangrove_planks_slats",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "fixfoot:block/mangrove_planks_slats",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "vined": "true"
+      },
+      "apply": {
+        "model": "fixfoot:block/slats_vine_overlay"
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "vined": "true"
+      },
+      "apply": {
+        "model": "fixfoot:block/slats_vine_overlay",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "vined": "true"
+      },
+      "apply": {
+        "model": "fixfoot:block/slats_vine_overlay",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "vined": "true"
+      },
+      "apply": {
+        "model": "fixfoot:block/slats_vine_overlay",
+        "y": 270
+      }
+    }
+  ]
+}

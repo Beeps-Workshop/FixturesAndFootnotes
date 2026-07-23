@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "fixfoot:block/crimson_planks_slat_screen"
+    },
+    "axis=z": {
+      "model": "fixfoot:block/crimson_planks_slat_screen",
+      "y": 90
+    }
+  }
+}

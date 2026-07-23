@@ -4,18 +4,17 @@ import com.beepsterr.fixfoot.Fixfoot;
 import com.beepsterr.fixfoot.block.DisplayFixtureBlock;
 import com.beepsterr.fixfoot.block.SlatPanelBlock;
 import com.beepsterr.fixfoot.block.SlatScreenBlock;
+import com.beepsterr.fixfoot.content.SlatVariants;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 
-/**
- * Central block registry. Adding a deco block is one {@code register(...)} line here
- * plus its blockstate/model/loot JSON under {@code src/main/resources}.
- */
 public final class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(Fixfoot.MOD_ID, Registries.BLOCK);
@@ -28,22 +27,27 @@ public final class ModBlocks {
                     .sound(SoundType.WOOD)
                     .noOcclusion()));
 
-    public static final RegistrySupplier<Block> OAK_SLATS = BLOCKS.register(
-            "oak_slats",
-            () -> new SlatPanelBlock(BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.WOOD)
-                    .strength(2.0F)
-                    .sound(SoundType.WOOD)
-                    .noOcclusion()
-                    .noCollission()));
+    // Per-variant slat blocks: a wall-hugging multiface block + a standing screen, keyed by variant.
+    public static final Map<String, RegistrySupplier<Block>> WALL = new LinkedHashMap<>();
+    public static final Map<String, RegistrySupplier<Block>> SCREEN = new LinkedHashMap<>();
 
-    public static final RegistrySupplier<Block> OAK_SLAT_SCREEN = BLOCKS.register(
-            "oak_slat_screen",
-            () -> new SlatScreenBlock(BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.WOOD)
-                    .strength(2.0F)
-                    .sound(SoundType.WOOD)
-                    .noOcclusion()));
+    static {
+        for (String key : SlatVariants.KEYS) {
+            WALL.put(key, BLOCKS.register(key + "_slats",
+                    () -> new SlatPanelBlock(BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.WOOD)
+                            .strength(2.0F)
+                            .sound(SoundType.WOOD)
+                            .noOcclusion()
+                            .noCollission())));
+            SCREEN.put(key, BLOCKS.register(key + "_slat_screen",
+                    () -> new SlatScreenBlock(BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.WOOD)
+                            .strength(2.0F)
+                            .sound(SoundType.WOOD)
+                            .noOcclusion())));
+        }
+    }
 
     private ModBlocks() {
     }
