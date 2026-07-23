@@ -16,7 +16,10 @@ public final class ModCreativeTabs {
             CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
                     .title(Component.translatable("itemGroup." + Fixfoot.MOD_ID + ".main"))
                     .icon(() -> new ItemStack(ModItems.DISPLAY_FIXTURE.get()))
-                    .displayItems((params, output) -> output.accept(ModItems.DISPLAY_FIXTURE.get()))
+                    .displayItems((params, output) -> {
+                        output.accept(ModItems.DISPLAY_FIXTURE.get());
+                        output.accept(ModItems.OAK_SLATS.get());
+                    })
                     .build());
 
     private ModCreativeTabs() {

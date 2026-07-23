@@ -6,6 +6,7 @@ import net.fabricmc.api.ClientModInitializer;
 public final class FixfootFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        FixfootClient.init();
+        FixfootClient.initClient();
+        FixfootClient.initRenderers();
     }
 }

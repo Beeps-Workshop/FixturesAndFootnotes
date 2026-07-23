@@ -1,6 +1,7 @@
 package com.beepsterr.fixfoot.registry;
 
 import com.beepsterr.fixfoot.Fixfoot;
+import com.beepsterr.fixfoot.item.SlatsItem;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.registries.Registries;
@@ -22,6 +23,11 @@ public final class ModItems {
     public static final RegistrySupplier<Item> DISPLAY_FIXTURE = ITEMS.register(
             "display_fixture",
             () -> new BlockItem(ModBlocks.DISPLAY_FIXTURE.get(), new Item.Properties()));
+
+    // One item places both forms: multiface slats on a wall face, the standing screen on a floor.
+    public static final RegistrySupplier<Item> OAK_SLATS = ITEMS.register(
+            "oak_slats",
+            () -> new SlatsItem(ModBlocks.OAK_SLATS.get(), ModBlocks.OAK_SLAT_SCREEN.get(), new Item.Properties()));
 
     private ModItems() {
     }

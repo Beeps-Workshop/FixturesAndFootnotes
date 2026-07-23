@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "axis=x": { "model": "fixfoot:block/oak_slat_screen" },
+    "axis=z": { "model": "fixfoot:block/oak_slat_screen", "y": 90 }
+  }
+}

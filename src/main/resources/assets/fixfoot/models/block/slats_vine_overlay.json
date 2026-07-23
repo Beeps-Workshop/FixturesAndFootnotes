@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "vine": "minecraft:block/vine",
+    "particle": "minecraft:block/vine"
+  },
+  "elements": [
+    {
+      "__comment": "One vine plane per bar, 1px in front (bars end at z=2). UVs match world X so the vine reads coherently across bars.",
+      "from": [1, 0, 3],
+      "to": [3, 16, 3],
+      "faces": {
+        "south": {"uv": [1, 0, 3, 16], "texture": "#vine", "tintindex": 0},
+        "north": {"uv": [3, 0, 1, 16], "texture": "#vine", "tintindex": 0}
+      }
+    },
+    {
+      "from": [5, 0, 3],
+      "to": [7, 16, 3],
+      "faces": {
+        "south": {"uv": [5, 0, 7, 16], "texture": "#vine", "tintindex": 0},
+        "north": {"uv": [7, 0, 5, 16], "texture": "#vine", "tintindex": 0}
+      }
+    },
+    {
+      "from": [9, 0, 3],
+      "to": [11, 16, 3],
+      "faces": {
+        "south": {"uv": [9, 0, 11, 16], "texture": "#vine", "tintindex": 0},
+        "north": {"uv": [11, 0, 9, 16], "texture": "#vine", "tintindex": 0}
+      }
+    },
+    {
+      "from": [13, 0, 3],
+      "to": [15, 16, 3],
+      "faces": {
+        "south": {"uv": [13, 0, 15, 16], "texture": "#vine", "tintindex": 0},
+        "north": {"uv": [15, 0, 13, 16], "texture": "#vine", "tintindex": 0}
+      }
+    }
+  ]
+}

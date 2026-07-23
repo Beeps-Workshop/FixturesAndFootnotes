@@ -2,6 +2,8 @@ package com.beepsterr.fixfoot.registry;
 
 import com.beepsterr.fixfoot.Fixfoot;
 import com.beepsterr.fixfoot.block.DisplayFixtureBlock;
+import com.beepsterr.fixfoot.block.SlatPanelBlock;
+import com.beepsterr.fixfoot.block.SlatScreenBlock;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.registries.Registries;
@@ -23,6 +25,23 @@ public final class ModBlocks {
             () -> new DisplayFixtureBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.WOOD)
                     .strength(1.5F)
+                    .sound(SoundType.WOOD)
+                    .noOcclusion()));
+
+    public static final RegistrySupplier<Block> OAK_SLATS = BLOCKS.register(
+            "oak_slats",
+            () -> new SlatPanelBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD)
+                    .strength(2.0F)
+                    .sound(SoundType.WOOD)
+                    .noOcclusion()
+                    .noCollission()));
+
+    public static final RegistrySupplier<Block> OAK_SLAT_SCREEN = BLOCKS.register(
+            "oak_slat_screen",
+            () -> new SlatScreenBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD)
+                    .strength(2.0F)
                     .sound(SoundType.WOOD)
                     .noOcclusion()));
 
