@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -26,6 +27,10 @@ public final class ModBlocks {
                     .strength(1.5F)
                     .sound(SoundType.WOOD)
                     .noOcclusion()));
+
+    public static final RegistrySupplier<Block> COPPER_SHEETMETAL = BLOCKS.register(
+            "copper_sheetmetal",
+            () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_BLOCK)));
 
     // Per-variant slat blocks: a wall-hugging multiface block + a standing screen, keyed by variant.
     public static final Map<String, RegistrySupplier<Block>> WALL = new LinkedHashMap<>();

@@ -164,7 +164,13 @@ def main():
             write(f"{DATA}/recipe/{key}_slats_from_{key}_stonecutting.json",
                   stonecut_recipe(base, f"{MODID}:{key}_slats"))
 
-    write(f"{ASSETS}/lang/en_us.json", lang)
+    # merge into en_us so hand-added (non-slat) entries survive a regen
+    lang_path = f"{ASSETS}/lang/en_us.json"
+    if os.path.exists(lang_path):
+        merged = json.load(open(lang_path))
+        merged.update(lang)
+        lang = merged
+    write(lang_path, lang)
     write(f"{RES}/data/minecraft/tags/block/mineable/axe.json", {"replace": False, "values": axe})
 
     # SlatVariants.java — the key list the registration loops over

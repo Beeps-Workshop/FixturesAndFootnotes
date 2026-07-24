@@ -19,6 +19,10 @@ public final class ModItems {
             "display_fixture",
             () -> new BlockItem(ModBlocks.DISPLAY_FIXTURE.get(), new Item.Properties()));
 
+    public static final RegistrySupplier<Item> COPPER_SHEETMETAL = ITEMS.register(
+            "copper_sheetmetal",
+            () -> new BlockItem(ModBlocks.COPPER_SHEETMETAL.get(), new Item.Properties()));
+
     // One item per variant — places wall slats on a wall face, the standing screen on a floor.
     public static final Map<String, RegistrySupplier<Item>> SLAT_ITEMS = new LinkedHashMap<>();
 
