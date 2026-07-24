@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "fixfoot:copper_sheetmetal"
+    "fixfoot:copper_sheetmetal",
+    "fixfoot:iron_sheetmetal"
   ]
 }

@@ -32,6 +32,10 @@ public final class ModBlocks {
             "copper_sheetmetal",
             () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_BLOCK)));
 
+    public static final RegistrySupplier<Block> IRON_SHEETMETAL = BLOCKS.register(
+            "iron_sheetmetal",
+            () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)));
+
     // Per-variant slat blocks: a wall-hugging multiface block + a standing screen, keyed by variant.
     public static final Map<String, RegistrySupplier<Block>> WALL = new LinkedHashMap<>();
     public static final Map<String, RegistrySupplier<Block>> SCREEN = new LinkedHashMap<>();

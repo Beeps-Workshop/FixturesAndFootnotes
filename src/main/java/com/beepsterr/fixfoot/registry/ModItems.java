@@ -23,6 +23,10 @@ public final class ModItems {
             "copper_sheetmetal",
             () -> new BlockItem(ModBlocks.COPPER_SHEETMETAL.get(), new Item.Properties()));
 
+    public static final RegistrySupplier<Item> IRON_SHEETMETAL = ITEMS.register(
+            "iron_sheetmetal",
+            () -> new BlockItem(ModBlocks.IRON_SHEETMETAL.get(), new Item.Properties()));
+
     // One item per variant — places wall slats on a wall face, the standing screen on a floor.
     public static final Map<String, RegistrySupplier<Item>> SLAT_ITEMS = new LinkedHashMap<>();
 
