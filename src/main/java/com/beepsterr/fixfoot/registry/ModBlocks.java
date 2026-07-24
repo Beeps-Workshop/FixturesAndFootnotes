@@ -3,6 +3,7 @@ package com.beepsterr.fixfoot.registry;
 import com.beepsterr.fixfoot.Fixfoot;
 import com.beepsterr.fixfoot.block.DisplayFixtureBlock;
 import com.beepsterr.fixfoot.block.SlatPanelBlock;
+import com.beepsterr.fixfoot.block.SheetmetalBlock;
 import com.beepsterr.fixfoot.block.SlatScreenBlock;
 import com.beepsterr.fixfoot.content.SlatVariants;
 import dev.architectury.registry.registries.DeferredRegister;
@@ -30,11 +31,11 @@ public final class ModBlocks {
 
     public static final RegistrySupplier<Block> COPPER_SHEETMETAL = BLOCKS.register(
             "copper_sheetmetal",
-            () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_BLOCK)));
+            () -> new SheetmetalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_BLOCK)));
 
     public static final RegistrySupplier<Block> IRON_SHEETMETAL = BLOCKS.register(
             "iron_sheetmetal",
-            () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)));
+            () -> new SheetmetalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)));
 
     // Per-variant slat blocks: a wall-hugging multiface block + a standing screen, keyed by variant.
     public static final Map<String, RegistrySupplier<Block>> WALL = new LinkedHashMap<>();

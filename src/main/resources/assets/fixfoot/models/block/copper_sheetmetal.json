@@ -1,6 +1,8 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "fixfoot:block/sheetmetal_directional",
   "textures": {
-    "all": "fixfoot:block/copper_sheetmetal"
+    "top": "fixfoot:block/copper_sheetmetal",
+    "bottom": "fixfoot:block/copper_sheetmetal_bottom",
+    "side": "fixfoot:block/copper_sheetmetal_side"
   }
 }
