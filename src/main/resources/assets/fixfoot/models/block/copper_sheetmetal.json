@@ -1,8 +1,6 @@
 {
-  "parent": "fixfoot:block/sheetmetal_directional",
+  "parent": "minecraft:block/template_glazed_terracotta",
   "textures": {
-    "top": "fixfoot:block/copper_sheetmetal",
-    "bottom": "fixfoot:block/copper_sheetmetal_bottom",
-    "side": "fixfoot:block/copper_sheetmetal_side"
+    "pattern": "fixfoot:block/copper_sheetmetal"
   }
 }

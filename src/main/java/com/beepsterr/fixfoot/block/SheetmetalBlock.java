@@ -4,21 +4,17 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 
 /**
- * Full-block sheetmetal with 6-way {@link #FACING}. The model gives distinct texture slots for the
- * facing face ({@code top}), its opposite ({@code bottom}) and the four sides ({@code side}), so a
- * placed block's front/back/sides can each be textured independently. Placed pointing toward the
- * player; rotate/mirror aware.
+ * Full-block sheetmetal with 4-way horizontal {@link #FACING}, glazed-terracotta style: the single
+ * corrugated texture rotates to orient the pattern, so it tiles into murals/directional runs.
  */
-public class SheetmetalBlock extends Block {
-    public static final DirectionProperty FACING = BlockStateProperties.FACING;
+public class SheetmetalBlock extends HorizontalDirectionalBlock {
     public static final MapCodec<SheetmetalBlock> CODEC = simpleCodec(SheetmetalBlock::new);
 
     public SheetmetalBlock(Properties properties) {
@@ -27,7 +23,7 @@ public class SheetmetalBlock extends Block {
     }
 
     @Override
-    protected MapCodec<? extends Block> codec() {
+    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
         return CODEC;
     }
 
@@ -38,8 +34,7 @@ public class SheetmetalBlock extends Block {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        // Front points toward the placer.
-        return defaultBlockState().setValue(FACING, context.getNearestLookingDirection().getOpposite());
+        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override

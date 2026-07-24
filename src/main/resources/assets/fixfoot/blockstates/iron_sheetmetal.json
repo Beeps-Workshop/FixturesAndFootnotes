@@ -1,10 +1,8 @@
 {
   "variants": {
-    "facing=north": { "model": "fixfoot:block/iron_sheetmetal" },
-    "facing=south": { "model": "fixfoot:block/iron_sheetmetal", "y": 180 },
-    "facing=east":  { "model": "fixfoot:block/iron_sheetmetal", "y": 90 },
-    "facing=west":  { "model": "fixfoot:block/iron_sheetmetal", "y": 270 },
-    "facing=up":    { "model": "fixfoot:block/iron_sheetmetal", "x": 270 },
-    "facing=down":  { "model": "fixfoot:block/iron_sheetmetal", "x": 90 }
+    "facing=south": { "model": "fixfoot:block/iron_sheetmetal" },
+    "facing=west":  { "model": "fixfoot:block/iron_sheetmetal", "y": 90 },
+    "facing=north": { "model": "fixfoot:block/iron_sheetmetal", "y": 180 },
+    "facing=east":  { "model": "fixfoot:block/iron_sheetmetal", "y": 270 }
   }
 }
