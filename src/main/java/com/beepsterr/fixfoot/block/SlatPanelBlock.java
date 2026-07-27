@@ -3,6 +3,7 @@ package com.beepsterr.fixfoot.block;
 import com.mojang.serialization.MapCodec;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -22,6 +24,9 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * Modern slat panels — a multiface block (the glow-lichen / sculk-vein mechanic) restricted to
@@ -36,13 +41,52 @@ public class SlatPanelBlock extends MultifaceBlock {
     public static final MapCodec<SlatPanelBlock> CODEC = simpleCodec(SlatPanelBlock::new);
     public static final BooleanProperty VINED = BooleanProperty.create("vined");
 
+    /**
+     * Depth of the shape per placed face, in pixels, matching the authored model: bars run 0..2,
+     * and the vine overlay adds a plane one pixel further out. Vanilla {@link MultifaceBlock}
+     * hard-codes 1px, which left the outline short of the bars — enough that anything measuring it
+     * (a fixture attaching itself to the slats) ended up sitting inside the model.
+     */
+    private static final int BAR_DEPTH = 2;
+    private static final int VINED_DEPTH = 3;
+
     // MultifaceBlock requires a spreader (used by growth/bonemeal spreading). We never trigger
     // spreading, but the abstract method must return non-null.
     private final MultifaceSpreader spreader = new MultifaceSpreader(this);
+    private final Map<BlockState, VoxelShape> shapes;
 
     public SlatPanelBlock(Properties properties) {
         super(properties);
         registerDefaultState(defaultBlockState().setValue(VINED, false));
+        this.shapes = getShapeForEachState(SlatPanelBlock::calculateShape);
+    }
+
+    @Override
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return shapes.get(state);
+    }
+
+    /** Union of one slab per placed face. Registered {@code .noCollission()}, so this is the outline only. */
+    private static VoxelShape calculateShape(BlockState state) {
+        int depth = state.getValue(VINED) ? VINED_DEPTH : BAR_DEPTH;
+        VoxelShape shape = Shapes.empty();
+        for (Direction face : Direction.values()) {
+            if (hasFace(state, face)) {
+                shape = Shapes.or(shape, faceShape(face, depth));
+            }
+        }
+        return shape.isEmpty() ? Shapes.block() : shape;
+    }
+
+    private static VoxelShape faceShape(Direction face, int depth) {
+        return switch (face) {
+            case NORTH -> Block.box(0, 0, 0, 16, 16, depth);
+            case SOUTH -> Block.box(0, 0, 16 - depth, 16, 16, 16);
+            case WEST -> Block.box(0, 0, 0, depth, 16, 16);
+            case EAST -> Block.box(16 - depth, 0, 0, 16, 16, 16);
+            case DOWN -> Block.box(0, 0, 0, 16, depth, 16);
+            case UP -> Block.box(0, 16 - depth, 0, 16, 16, 16);
+        };
     }
 
     @Override
