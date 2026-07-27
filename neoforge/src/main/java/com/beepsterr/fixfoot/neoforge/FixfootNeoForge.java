@@ -18,10 +18,8 @@ public final class FixfootNeoForge {
         // client classes never load on a dedicated server.
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modBus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(FixfootClient::initClient));
-            modBus.addListener((EntityRenderersEvent.RegisterRenderers event) -> {
-                FixfootClient.initRenderers();
-                FixfootClient.initEntityRenderers(event::registerEntityRenderer);
-            });
+            modBus.addListener((EntityRenderersEvent.RegisterRenderers event) ->
+                    FixfootClient.initEntityRenderers(event::registerEntityRenderer));
         }
     }
 }

@@ -15,9 +15,8 @@ public final class ModCreativeTabs {
     public static final RegistrySupplier<CreativeModeTab> MAIN = TABS.register("main", () ->
             CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
                     .title(Component.translatable("itemGroup." + Fixfoot.MOD_ID + ".main"))
-                    .icon(() -> new ItemStack(ModItems.DISPLAY_FIXTURE.get()))
+                    .icon(() -> new ItemStack(ModItems.WIDE_PLANTER.get()))
                     .displayItems((params, output) -> {
-                        output.accept(ModItems.DISPLAY_FIXTURE.get());
                         output.accept(ModItems.WIDE_PLANTER.get());
                         output.accept(ModItems.SMALL_STORAGE_NET.get());
                         output.accept(ModItems.STORAGE_NET.get());

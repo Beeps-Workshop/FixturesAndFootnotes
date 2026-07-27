@@ -1,13 +1,10 @@
 package com.beepsterr.fixfoot.client;
 
-import com.beepsterr.fixfoot.client.render.DisplayFixtureRenderer;
 import com.beepsterr.fixfoot.client.render.StorageNetRenderer;
 import com.beepsterr.fixfoot.client.render.WidePlanterRenderer;
 import com.beepsterr.fixfoot.content.SlatVariants;
-import com.beepsterr.fixfoot.registry.ModBlockEntities;
 import com.beepsterr.fixfoot.registry.ModBlocks;
 import com.beepsterr.fixfoot.registry.ModEntities;
-import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import net.minecraft.client.color.block.BlockColor;
@@ -21,11 +18,11 @@ import net.minecraft.world.level.block.Block;
 /**
  * Loader-agnostic client init, split by the window each registration needs:
  * {@link #initClient()} for colors + render types (general client setup), and
- * {@link #initRenderers()} for block-entity renderers (NeoForge's EntityRenderersEvent window).
+ * {@link #initEntityRenderers(EntityRendererSink)} for entity renderers, which need NeoForge's
+ * EntityRenderersEvent window.
  *
- * <p>{@link #initEntityRenderers(EntityRendererSink)} is the odd one out: Architectury has no
- * entity-renderer registry, so each loader hands in its own registrar and the list of renderers
- * still lives here rather than being duplicated per loader.
+ * <p>Entity renderers take a sink because Architectury has no registry for them, so each loader
+ * hands in its own registrar and the list still lives here rather than being duplicated per loader.
  */
 public final class FixfootClient {
     /** Bridges Fabric's EntityRendererRegistry and NeoForge's RegisterRenderers event. */
@@ -47,10 +44,6 @@ public final class FixfootClient {
             RenderTypeRegistry.register(RenderType.cutout(), wall); // cutout so the vine shows through
             ColorHandlerRegistry.registerBlockColors(foliage, wall);
         }
-    }
-
-    public static void initRenderers() {
-        BlockEntityRendererRegistry.register(ModBlockEntities.DISPLAY_FIXTURE.get(), DisplayFixtureRenderer::new);
     }
 
     public static void initEntityRenderers(EntityRendererSink sink) {

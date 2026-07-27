@@ -19,10 +19,6 @@ public final class ModItems {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(Fixfoot.MOD_ID, Registries.ITEM);
 
-    public static final RegistrySupplier<Item> DISPLAY_FIXTURE = ITEMS.register(
-            "display_fixture",
-            () -> new BlockItem(ModBlocks.DISPLAY_FIXTURE.get(), new Item.Properties()));
-
     public static final RegistrySupplier<Item> COPPER_SHEETMETAL = ITEMS.register(
             "copper_sheetmetal",
             () -> new BlockItem(ModBlocks.COPPER_SHEETMETAL.get(), new Item.Properties()));

@@ -1,7 +1,6 @@
 package com.beepsterr.fixfoot.registry;
 
 import com.beepsterr.fixfoot.Fixfoot;
-import com.beepsterr.fixfoot.block.DisplayFixtureBlock;
 import com.beepsterr.fixfoot.block.SlatPanelBlock;
 import com.beepsterr.fixfoot.block.SheetmetalBlock;
 import com.beepsterr.fixfoot.block.SlatScreenBlock;
@@ -21,14 +20,6 @@ import net.minecraft.world.level.material.MapColor;
 public final class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(Fixfoot.MOD_ID, Registries.BLOCK);
-
-    public static final RegistrySupplier<Block> DISPLAY_FIXTURE = BLOCKS.register(
-            "display_fixture",
-            () -> new DisplayFixtureBlock(BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.WOOD)
-                    .strength(1.5F)
-                    .sound(SoundType.WOOD)
-                    .noOcclusion()));
 
     public static final RegistrySupplier<Block> COPPER_SHEETMETAL = BLOCKS.register(
             "copper_sheetmetal",

@@ -1,6 +1,5 @@
 package com.beepsterr.fixfoot;
 
-import com.beepsterr.fixfoot.registry.ModBlockEntities;
 import com.beepsterr.fixfoot.registry.ModBlocks;
 import com.beepsterr.fixfoot.registry.ModCreativeTabs;
 import com.beepsterr.fixfoot.registry.ModEntities;
@@ -20,7 +19,6 @@ public final class Fixfoot {
     public static void init() {
         ModBlocks.register();
         ModItems.register();
-        ModBlockEntities.register();
         ModEntities.register();
         ModCreativeTabs.register();
     }

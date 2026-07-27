@@ -8,7 +8,6 @@ public final class FixfootFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         FixfootClient.initClient();
-        FixfootClient.initRenderers();
         FixfootClient.initEntityRenderers(EntityRendererRegistry::register);
     }
 }
