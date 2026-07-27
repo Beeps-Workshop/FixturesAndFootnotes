@@ -36,6 +36,14 @@ public class WidePlanterRenderer extends AttachedFixtureRenderer<WidePlanterEnti
             // renderSingleBlock draws from the origin outwards, so recentre it on the slot.
             poseStack.translate(-0.5D, 0.0D, -0.5D);
             blockRenderer.renderSingleBlock(plant, poseStack, buffers, packedLight, OverlayTexture.NO_OVERLAY);
+
+            // Sunflowers and rose bushes are two separate block states; drawing only the lower one
+            // leaves a bare stem. The translate lands inside the scale, so it's exactly one block up.
+            BlockState upper = WidePlanterEntity.upperHalf(plant);
+            if (!upper.isAir()) {
+                poseStack.translate(0.0D, 1.0D, 0.0D);
+                blockRenderer.renderSingleBlock(upper, poseStack, buffers, packedLight, OverlayTexture.NO_OVERLAY);
+            }
             poseStack.popPose();
         }
     }

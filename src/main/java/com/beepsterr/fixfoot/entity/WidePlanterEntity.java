@@ -2,6 +2,7 @@ package com.beepsterr.fixfoot.entity;
 
 import com.beepsterr.fixfoot.registry.ModEntities;
 import com.beepsterr.fixfoot.registry.ModItems;
+import java.util.Collections;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -23,9 +24,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BambooSaplingBlock;
+import net.minecraft.world.level.block.BambooStalkBlock;
+import net.minecraft.world.level.block.CactusBlock;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.SeaPickleBlock;
+import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BambooLeaves;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -99,7 +109,7 @@ public class WidePlanterEntity extends AttachedFixtureEntity {
         entityData.set(PLANTS.get(slot), stack);
     }
 
-    /** Flowers, saplings and crops — the three things the planter is meant to show off. */
+    /** Flowers, saplings, crops, and the odd plants that fit none of those categories. */
     public static boolean isPlantable(ItemStack stack) {
         if (!(stack.getItem() instanceof BlockItem blockItem)) {
             return false;
@@ -109,22 +119,49 @@ public class WidePlanterEntity extends AttachedFixtureEntity {
         }
         // Seeds, carrots and potatoes are all ItemNameBlockItems pointing at their planted block.
         Block block = blockItem.getBlock();
-        return block instanceof CropBlock || block instanceof StemBlock;
+        return block instanceof CropBlock
+                || block instanceof StemBlock
+                // Vanilla gives these no shared supertype or tag, but they all read as something
+                // you'd grow in a trough. Matching on class keeps modded equivalents working.
+                || block instanceof CactusBlock
+                || block instanceof BambooStalkBlock
+                || block instanceof BambooSaplingBlock
+                || block instanceof SeaPickleBlock
+                || block instanceof SweetBerryBushBlock;
     }
 
     /**
-     * The state drawn for a slot. Crops show fully grown — the planter is decorative, so a slot
-     * holding wheat seeds should look like wheat rather than a bare sprout.
+     * The state drawn for a slot. Anything that grows is shown at full size — the planter is
+     * decorative, so a slot holding wheat seeds should look like wheat rather than a bare sprout.
      */
     public static BlockState displayState(ItemStack stack) {
         if (!(stack.getItem() instanceof BlockItem blockItem)) {
             return Blocks.AIR.defaultBlockState();
         }
         Block block = blockItem.getBlock();
-        if (block instanceof CropBlock crop) {
-            return crop.getStateForAge(crop.getMaxAge());
+        BlockState state = block.defaultBlockState();
+
+        // Matching the property by name rather than the block by class ripens crops, sweet berries
+        // and any modded plant that follows the same convention, in one branch.
+        if (block.getStateDefinition().getProperty("age") instanceof IntegerProperty age) {
+            state = state.setValue(age, Collections.max(age.getPossibleValues()));
         }
-        return block.defaultBlockState();
+        // A bare stalk is the bamboo default; give it foliage so it reads as a plant.
+        if (block instanceof BambooStalkBlock) {
+            state = state.setValue(BambooStalkBlock.LEAVES, BambooLeaves.LARGE);
+        }
+        return state;
+    }
+
+    /**
+     * The top half of a two-block plant such as a sunflower or rose bush, or air for everything
+     * else. Without this the renderer draws only the lower half and a sunflower is a bare stem.
+     */
+    public static BlockState upperHalf(BlockState state) {
+        if (state.hasProperty(DoublePlantBlock.HALF)) {
+            return state.setValue(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER);
+        }
+        return Blocks.AIR.defaultBlockState();
     }
 
     @Override
