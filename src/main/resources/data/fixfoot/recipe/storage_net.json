@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "NN"
+  ],
+  "key": {
+    "N": { "item": "fixfoot:small_storage_net" }
+  },
+  "result": {
+    "count": 1,
+    "id": "fixfoot:storage_net"
+  }
+}
