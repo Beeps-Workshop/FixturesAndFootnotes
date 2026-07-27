@@ -1,7 +1,7 @@
 package com.beepsterr.fixfoot.client;
 
 import com.beepsterr.fixfoot.client.render.DisplayFixtureRenderer;
-import com.beepsterr.fixfoot.client.render.SmallStorageNetRenderer;
+import com.beepsterr.fixfoot.client.render.StorageNetRenderer;
 import com.beepsterr.fixfoot.client.render.WidePlanterRenderer;
 import com.beepsterr.fixfoot.content.SlatVariants;
 import com.beepsterr.fixfoot.registry.ModBlockEntities;
@@ -55,6 +55,6 @@ public final class FixfootClient {
 
     public static void initEntityRenderers(EntityRendererSink sink) {
         sink.register(ModEntities.WIDE_PLANTER.get(), WidePlanterRenderer::new);
-        sink.register(ModEntities.SMALL_STORAGE_NET.get(), SmallStorageNetRenderer::new);
+        sink.register(ModEntities.SMALL_STORAGE_NET.get(), StorageNetRenderer::new);
     }
 }
