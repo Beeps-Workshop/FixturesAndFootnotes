@@ -20,6 +20,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.DISPLAY_FIXTURE.get());
                         output.accept(ModItems.WIDE_PLANTER.get());
                         output.accept(ModItems.SMALL_STORAGE_NET.get());
+                        output.accept(ModItems.STORAGE_NET.get());
                         output.accept(ModItems.COPPER_SHEETMETAL.get());
                         output.accept(ModItems.IRON_SHEETMETAL.get());
                         for (String key : com.beepsterr.fixfoot.content.SlatVariants.KEYS) {

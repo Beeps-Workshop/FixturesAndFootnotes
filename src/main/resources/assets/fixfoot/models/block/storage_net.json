@@ -1,0 +1,55 @@
+{
+  "__comment": "Placeholder net woven from the vanilla cobweb texture — swap #net for your own art. Wall fixture, so it's authored facing you with the wall behind at z=16. Two blocks wide: block models may run from -16 to 32, so the mesh spans x=-8 to x=24, centred on the attachment block. Zero-thickness planes with both faces, and no back plane since that face sits flush against the wall.",
+  "parent": "block/block",
+  "textures": {
+    "net": "minecraft:block/cobweb",
+    "particle": "minecraft:block/cobweb"
+  },
+  "elements": [
+    {
+      "__comment": "pouch floor",
+      "from": [-8, 1, 11],
+      "to": [24, 1, 16],
+      "faces": {
+        "up":   {"uv": [0, 11, 16, 16], "texture": "#net"},
+        "down": {"uv": [0, 11, 16, 16], "texture": "#net"}
+      }
+    },
+    {
+      "__comment": "front face of the pouch",
+      "from": [-8, 1, 11],
+      "to": [24, 15, 11],
+      "faces": {
+        "north": {"uv": [0, 1, 16, 15], "texture": "#net"},
+        "south": {"uv": [0, 1, 16, 15], "texture": "#net"}
+      }
+    },
+    {
+      "__comment": "left end cap",
+      "from": [-8, 1, 11],
+      "to": [-8, 15, 16],
+      "faces": {
+        "west": {"uv": [11, 1, 16, 15], "texture": "#net"},
+        "east": {"uv": [11, 1, 16, 15], "texture": "#net"}
+      }
+    },
+    {
+      "__comment": "right end cap",
+      "from": [24, 1, 11],
+      "to": [24, 15, 16],
+      "faces": {
+        "west": {"uv": [11, 1, 16, 15], "texture": "#net"},
+        "east": {"uv": [11, 1, 16, 15], "texture": "#net"}
+      }
+    },
+    {
+      "__comment": "top edge, the rope the pouch hangs from",
+      "from": [-8, 15, 12],
+      "to": [24, 15, 16],
+      "faces": {
+        "up":   {"uv": [0, 12, 16, 16], "texture": "#net"},
+        "down": {"uv": [0, 12, 16, 16], "texture": "#net"}
+      }
+    }
+  ]
+}

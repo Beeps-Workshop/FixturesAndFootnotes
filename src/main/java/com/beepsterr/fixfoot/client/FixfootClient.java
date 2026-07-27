@@ -55,6 +55,8 @@ public final class FixfootClient {
 
     public static void initEntityRenderers(EntityRendererSink sink) {
         sink.register(ModEntities.WIDE_PLANTER.get(), WidePlanterRenderer::new);
+        // One renderer serves every net; the preview layout comes from the entity.
         sink.register(ModEntities.SMALL_STORAGE_NET.get(), StorageNetRenderer::new);
+        sink.register(ModEntities.STORAGE_NET.get(), StorageNetRenderer::new);
     }
 }
