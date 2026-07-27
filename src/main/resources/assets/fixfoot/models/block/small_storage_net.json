@@ -1,0 +1,51 @@
+{
+  "__comment": "Placeholder net woven from the vanilla cobweb texture — swap #net for your own art. Ceiling fixtures are authored upright in ordinary block space: the net hangs from y=16 down to y=10, leaving the 10px below it clear so the tile stays walkable. Zero-thickness planes, each with both faces, so the mesh reads from inside and out.",
+  "parent": "block/block",
+  "textures": {
+    "net": "minecraft:block/cobweb",
+    "particle": "minecraft:block/cobweb"
+  },
+  "elements": [
+    {
+      "__comment": "floor of the net",
+      "from": [1, 10, 1],
+      "to": [15, 10, 15],
+      "faces": {
+        "up":   {"uv": [1, 1, 15, 15], "texture": "#net"},
+        "down": {"uv": [1, 1, 15, 15], "texture": "#net"}
+      }
+    },
+    {
+      "from": [1, 10, 1],
+      "to": [15, 16, 1],
+      "faces": {
+        "north": {"uv": [1, 0, 15, 6], "texture": "#net"},
+        "south": {"uv": [1, 0, 15, 6], "texture": "#net"}
+      }
+    },
+    {
+      "from": [1, 10, 15],
+      "to": [15, 16, 15],
+      "faces": {
+        "north": {"uv": [1, 0, 15, 6], "texture": "#net"},
+        "south": {"uv": [1, 0, 15, 6], "texture": "#net"}
+      }
+    },
+    {
+      "from": [1, 10, 1],
+      "to": [1, 16, 15],
+      "faces": {
+        "west": {"uv": [1, 0, 15, 6], "texture": "#net"},
+        "east": {"uv": [1, 0, 15, 6], "texture": "#net"}
+      }
+    },
+    {
+      "from": [15, 10, 1],
+      "to": [15, 16, 15],
+      "faces": {
+        "west": {"uv": [1, 0, 15, 6], "texture": "#net"},
+        "east": {"uv": [1, 0, 15, 6], "texture": "#net"}
+      }
+    }
+  ]
+}

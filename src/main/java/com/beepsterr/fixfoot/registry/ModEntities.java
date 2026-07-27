@@ -1,6 +1,7 @@
 package com.beepsterr.fixfoot.registry;
 
 import com.beepsterr.fixfoot.Fixfoot;
+import com.beepsterr.fixfoot.entity.SmallStorageNetEntity;
 import com.beepsterr.fixfoot.entity.WidePlanterEntity;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -21,6 +22,14 @@ public final class ModEntities {
                     .clientTrackingRange(10)
                     .updateInterval(Integer.MAX_VALUE)
                     .build("wide_planter"));
+
+    public static final RegistrySupplier<EntityType<SmallStorageNetEntity>> SMALL_STORAGE_NET =
+            ENTITY_TYPES.register("small_storage_net", () -> EntityType.Builder
+                    .<SmallStorageNetEntity>of(SmallStorageNetEntity::new, MobCategory.MISC)
+                    .sized(SmallStorageNetEntity.WIDTH, SmallStorageNetEntity.HANG)
+                    .clientTrackingRange(10)
+                    .updateInterval(Integer.MAX_VALUE)
+                    .build("small_storage_net"));
 
     private ModEntities() {
     }

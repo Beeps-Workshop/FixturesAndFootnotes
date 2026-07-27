@@ -2,6 +2,8 @@
   "block.fixfoot.display_fixture": "Display Fixture",
   "item.fixfoot.wide_planter": "Wide Planter",
   "entity.fixfoot.wide_planter": "Wide Planter",
+  "item.fixfoot.small_storage_net": "Small Storage Net",
+  "entity.fixfoot.small_storage_net": "Small Storage Net",
   "itemGroup.fixfoot.main": "Fixtures & Footnotes",
   "block.fixfoot.copper_sheetmetal": "Copper Sheetmetal",
   "block.fixfoot.iron_sheetmetal": "Iron Sheetmetal",
