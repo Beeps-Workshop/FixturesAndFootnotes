@@ -148,6 +148,11 @@ public class WidePlanterEntity extends AttachedFixtureEntity {
      * same axis the renderer's Y rotation produces.
      */
     private int slotFor(Vec3 hitVec) {
+        if (!direction.getAxis().isHorizontal()) {
+            // canAttachTo keeps the planter off floors and ceilings, so this is only reachable on a
+            // /summon'd entity. Bail out rather than let getClockWise() throw on the vertical axis.
+            return 0;
+        }
         Direction right = direction.getClockWise();
         double along = hitVec.x * right.getStepX() + hitVec.z * right.getStepZ();
         return Mth.clamp((int) ((along / WIDTH + 0.5D) * SLOTS), 0, SLOTS - 1);

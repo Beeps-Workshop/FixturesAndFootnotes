@@ -1,5 +1,6 @@
 package com.beepsterr.fixfoot.entity;
 
+import java.util.Objects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -67,6 +68,27 @@ public abstract class AttachedFixtureEntity extends HangingEntity {
      */
     public boolean canAttachTo(Direction facing) {
         return facing.getAxis().isHorizontal();
+    }
+
+    /**
+     * Vanilla {@link HangingEntity#setDirection} asserts a horizontal facing and throws otherwise —
+     * from the constructor, so it fires before {@link #canAttachTo} can refuse the face. Overridden
+     * for the same reason ItemFrame overrides it: branch on the axis and drive xRot rather than yRot
+     * for ceiling and floor mounts. Without this, vertical faces aren't merely rejected, they crash.
+     */
+    @Override
+    protected void setDirection(Direction facing) {
+        this.direction = Objects.requireNonNull(facing);
+        if (facing.getAxis().isHorizontal()) {
+            setXRot(0.0F);
+            setYRot(facing.get2DDataValue() * 90.0F);
+        } else {
+            setXRot(-90.0F * facing.getAxisDirection().getStep());
+            setYRot(0.0F);
+        }
+        this.xRotO = getXRot();
+        this.yRotO = getYRot();
+        recalculateBoundingBox();
     }
 
     @Override
