@@ -3,6 +3,7 @@ package com.beepsterr.fixfoot;
 import com.beepsterr.fixfoot.registry.ModBlockEntities;
 import com.beepsterr.fixfoot.registry.ModBlocks;
 import com.beepsterr.fixfoot.registry.ModCreativeTabs;
+import com.beepsterr.fixfoot.registry.ModEntities;
 import com.beepsterr.fixfoot.registry.ModItems;
 
 /**
@@ -20,6 +21,7 @@ public final class Fixfoot {
         ModBlocks.register();
         ModItems.register();
         ModBlockEntities.register();
+        ModEntities.register();
         ModCreativeTabs.register();
     }
 }

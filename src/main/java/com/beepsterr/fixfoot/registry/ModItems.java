@@ -2,6 +2,8 @@ package com.beepsterr.fixfoot.registry;
 
 import com.beepsterr.fixfoot.Fixfoot;
 import com.beepsterr.fixfoot.content.SlatVariants;
+import com.beepsterr.fixfoot.entity.WidePlanterEntity;
+import com.beepsterr.fixfoot.item.AttachedFixtureItem;
 import com.beepsterr.fixfoot.item.SlatsItem;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -26,6 +28,11 @@ public final class ModItems {
     public static final RegistrySupplier<Item> IRON_SHEETMETAL = ITEMS.register(
             "iron_sheetmetal",
             () -> new BlockItem(ModBlocks.IRON_SHEETMETAL.get(), new Item.Properties()));
+
+    // Not a BlockItem: this places a hanging entity onto the clicked face, item-frame style.
+    public static final RegistrySupplier<Item> WIDE_PLANTER = ITEMS.register(
+            "wide_planter",
+            () -> new AttachedFixtureItem(WidePlanterEntity::new, new Item.Properties()));
 
     // One item per variant — places wall slats on a wall face, the standing screen on a floor.
     public static final Map<String, RegistrySupplier<Item>> SLAT_ITEMS = new LinkedHashMap<>();

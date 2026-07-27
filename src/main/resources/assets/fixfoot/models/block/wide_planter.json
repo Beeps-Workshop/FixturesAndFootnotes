@@ -1,0 +1,84 @@
+{
+  "__comment": "Placeholder terracotta trough — swap #pot/#soil for your own art. Authored in the entity's local space: the wall it hangs on is at z=16, the trough front faces the viewer at z=8, and the soil surface at y=8 is where WidePlanterRenderer stands the plants.",
+  "parent": "block/block",
+  "textures": {
+    "pot": "minecraft:block/terracotta",
+    "soil": "minecraft:block/dirt",
+    "particle": "minecraft:block/terracotta"
+  },
+  "elements": [
+    {
+      "__comment": "floor of the trough",
+      "from": [0, 2, 8],
+      "to": [16, 4, 16],
+      "faces": {
+        "down":  {"texture": "#pot"},
+        "up":    {"texture": "#pot"},
+        "north": {"texture": "#pot"},
+        "south": {"texture": "#pot"},
+        "west":  {"texture": "#pot"},
+        "east":  {"texture": "#pot"}
+      }
+    },
+    {
+      "__comment": "front wall",
+      "from": [0, 4, 8],
+      "to": [16, 10, 9],
+      "faces": {
+        "up":    {"texture": "#pot"},
+        "north": {"texture": "#pot"},
+        "south": {"texture": "#pot"},
+        "west":  {"texture": "#pot"},
+        "east":  {"texture": "#pot"}
+      }
+    },
+    {
+      "__comment": "back wall, against the block it hangs on",
+      "from": [0, 4, 15],
+      "to": [16, 10, 16],
+      "faces": {
+        "up":    {"texture": "#pot"},
+        "north": {"texture": "#pot"},
+        "south": {"texture": "#pot"},
+        "west":  {"texture": "#pot"},
+        "east":  {"texture": "#pot"}
+      }
+    },
+    {
+      "__comment": "left end cap",
+      "from": [0, 4, 9],
+      "to": [1, 10, 15],
+      "faces": {
+        "up":    {"texture": "#pot"},
+        "north": {"texture": "#pot"},
+        "south": {"texture": "#pot"},
+        "west":  {"texture": "#pot"},
+        "east":  {"texture": "#pot"}
+      }
+    },
+    {
+      "__comment": "right end cap",
+      "from": [15, 4, 9],
+      "to": [16, 10, 15],
+      "faces": {
+        "up":    {"texture": "#pot"},
+        "north": {"texture": "#pot"},
+        "south": {"texture": "#pot"},
+        "west":  {"texture": "#pot"},
+        "east":  {"texture": "#pot"}
+      }
+    },
+    {
+      "__comment": "soil the plants sit in",
+      "from": [1, 4, 9],
+      "to": [15, 8, 15],
+      "faces": {
+        "up":    {"texture": "#soil"},
+        "north": {"texture": "#soil"},
+        "south": {"texture": "#soil"},
+        "west":  {"texture": "#soil"},
+        "east":  {"texture": "#soil"}
+      }
+    }
+  ]
+}
