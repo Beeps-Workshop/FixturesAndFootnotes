@@ -155,6 +155,14 @@ public abstract class AttachedFixtureEntity extends HangingEntity {
     }
 
     @Override
+    public Vec3 getLightProbePosition(float partialTick) {
+        // Entity's default probes the eye position — position plus eye height — which for something
+        // hugging its support lands inside the support block and samples zero light. A ceiling net
+        // renders solid black that way. Sample the open block the fixture hangs in instead.
+        return Vec3.atCenterOf(pos);
+    }
+
+    @Override
     public void tick() {
         // Two reasons to re-measure rather than trust the gap taken at placement: on world load the
         // entity can deserialise before the support's chunk exists (measuring against air), and a
