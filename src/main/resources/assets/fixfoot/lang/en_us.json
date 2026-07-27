@@ -68,5 +68,17 @@
   "block.fixfoot.stripped_bamboo_block_slats": "Stripped Bamboo Block Slats",
   "block.fixfoot.stripped_bamboo_block_slat_screen": "Stripped Bamboo Block Slat Screen",
   "block.fixfoot.bamboo_planks_slats": "Bamboo Planks Slats",
-  "block.fixfoot.bamboo_planks_slat_screen": "Bamboo Planks Slat Screen"
+  "block.fixfoot.bamboo_planks_slat_screen": "Bamboo Planks Slat Screen",
+  "block.fixfoot.glowstone_slats": "Glowstone Slats",
+  "block.fixfoot.glowstone_slat_screen": "Glowstone Slat Screen",
+  "block.fixfoot.sea_lantern_slats": "Sea Lantern Slats",
+  "block.fixfoot.sea_lantern_slat_screen": "Sea Lantern Slat Screen",
+  "block.fixfoot.ochre_froglight_slats": "Ochre Froglight Slats",
+  "block.fixfoot.ochre_froglight_slat_screen": "Ochre Froglight Slat Screen",
+  "block.fixfoot.verdant_froglight_slats": "Verdant Froglight Slats",
+  "block.fixfoot.verdant_froglight_slat_screen": "Verdant Froglight Slat Screen",
+  "block.fixfoot.pearlescent_froglight_slats": "Pearlescent Froglight Slats",
+  "block.fixfoot.pearlescent_froglight_slat_screen": "Pearlescent Froglight Slat Screen",
+  "block.fixfoot.magma_slats": "Magma Slats",
+  "block.fixfoot.magma_slat_screen": "Magma Slat Screen"
 }

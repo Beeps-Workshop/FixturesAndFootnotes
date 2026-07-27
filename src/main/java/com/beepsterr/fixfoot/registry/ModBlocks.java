@@ -10,6 +10,7 @@ import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -44,19 +45,25 @@ public final class ModBlocks {
     static {
         for (String key : SlatVariants.KEYS) {
             WALL.put(key, BLOCKS.register(key + "_slats",
-                    () -> new SlatPanelBlock(BlockBehaviour.Properties.of()
-                            .mapColor(MapColor.WOOD)
-                            .strength(2.0F)
-                            .sound(SoundType.WOOD)
-                            .noOcclusion()
-                            .noCollission())));
+                    () -> new SlatPanelBlock(slatProperties(key).noOcclusion().noCollission())));
             SCREEN.put(key, BLOCKS.register(key + "_slat_screen",
-                    () -> new SlatScreenBlock(BlockBehaviour.Properties.of()
-                            .mapColor(MapColor.WOOD)
-                            .strength(2.0F)
-                            .sound(SoundType.WOOD)
-                            .noOcclusion())));
+                    () -> new SlatScreenBlock(slatProperties(key).noOcclusion())));
         }
+    }
+
+    /**
+     * Woods share one set of plank-ish properties; the non-wood variants copy their vanilla block
+     * instead, so glowstone/froglight slats emit light and magma slats keep magma's toughness.
+     */
+    private static BlockBehaviour.Properties slatProperties(String key) {
+        Supplier<Block> special = SlatVariants.SPECIAL_BASE.get(key);
+        if (special != null) {
+            return BlockBehaviour.Properties.ofFullCopy(special.get());
+        }
+        return BlockBehaviour.Properties.of()
+                .mapColor(MapColor.WOOD)
+                .strength(2.0F)
+                .sound(SoundType.WOOD);
     }
 
     private ModBlocks() {

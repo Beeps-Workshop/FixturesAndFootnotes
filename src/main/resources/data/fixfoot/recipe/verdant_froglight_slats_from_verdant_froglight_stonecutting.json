@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "minecraft:verdant_froglight"
+  },
+  "result": {
+    "count": 8,
+    "id": "fixfoot:verdant_froglight_slats"
+  }
+}

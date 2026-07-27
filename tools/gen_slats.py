@@ -10,7 +10,7 @@ wall-slats block + a standing-screen block sharing one item. Run from the repo r
 It writes blockstates, models, item models, loot tables and stonecutter recipes into
 src/main/resources, rebuilds the mineable/axe tag + en_us slat entries, and regenerates
 src/main/java/com/beepsterr/fixfoot/content/SlatVariants.java (the key list the mod loops over).
-Adding a wood = one entry in WOODS below.
+Adding a wood = one entry in WOODS below; adding a non-wood material = one entry in EXTRAS.
 """
 import json
 import os
@@ -29,6 +29,26 @@ WOODS = {
     "crimson": "stem", "warped": "stem",
     "bamboo": "block",
 }
+
+# Non-wood materials. Single variant each, no stripped/planks fan-out. These copy their vanilla
+# block's properties in code (light level, sound, hardness), so glowstone slats glow etc.
+# tool = which mineable/<tool> tag to list them in (None = no tool tag, like their vanilla block).
+EXTRAS = [
+    # key, base item, texture, display, Blocks.<field>, tool
+    ("glowstone", "minecraft:glowstone", "minecraft:block/glowstone",
+     "Glowstone", "GLOWSTONE", None),
+    ("sea_lantern", "minecraft:sea_lantern", "minecraft:block/sea_lantern",
+     "Sea Lantern", "SEA_LANTERN", None),
+    ("ochre_froglight", "minecraft:ochre_froglight", "minecraft:block/ochre_froglight_side",
+     "Ochre Froglight", "OCHRE_FROGLIGHT", None),
+    ("verdant_froglight", "minecraft:verdant_froglight", "minecraft:block/verdant_froglight_side",
+     "Verdant Froglight", "VERDANT_FROGLIGHT", None),
+    ("pearlescent_froglight", "minecraft:pearlescent_froglight",
+     "minecraft:block/pearlescent_froglight_side",
+     "Pearlescent Froglight", "PEARLESCENT_FROGLIGHT", None),
+    ("magma", "minecraft:magma_block", "minecraft:block/magma",
+     "Magma", "MAGMA_BLOCK", "pickaxe"),
+]
 
 
 def title(s):
@@ -52,6 +72,8 @@ def variants():
     out = []
     for wood, noun in WOODS.items():
         out.extend(wood_materials(wood, noun))
+    for key, base, tex, disp, _field, _tool in EXTRAS:
+        out.append((key, base, tex, disp))
     return out
 
 
@@ -110,6 +132,17 @@ def block_loot(item):
     }
 
 
+def merge_tag(path, values):
+    """Write a mineable tag, keeping any hand-added non-slat entries already in the file."""
+    kept = []
+    if os.path.exists(path):
+        for v in json.load(open(path)).get("values", []):
+            if not (isinstance(v, str) and v.startswith(f"{MODID}:")
+                    and (v.endswith("_slats") or v.endswith("_slat_screen"))):
+                kept.append(v)
+    write(path, {"replace": False, "values": kept + values})
+
+
 def stonecut_recipe(base, result_item):
     return {
         "type": "minecraft:stonecutting",
@@ -129,7 +162,8 @@ def main():
         "block.fixfoot.display_fixture": "Display Fixture",
         "itemGroup.fixfoot.main": "Fixtures & Footnotes",
     }
-    axe = []
+    tools = {"axe": []}  # tool tag name -> block ids; woods are axe, extras pick their own
+    extra_tool = {key: tool for key, _b, _t, _d, _f, tool in EXTRAS}
 
     for key, base, tex, disp in vs:
         item = f"{MODID}:{key}_slats"
@@ -148,8 +182,10 @@ def main():
         # lang + tag
         lang[f"block.fixfoot.{key}_slats"] = f"{disp} Slats"
         lang[f"block.fixfoot.{key}_slat_screen"] = f"{disp} Slat Screen"
-        axe.append(f"{MODID}:{key}_slats")
-        axe.append(f"{MODID}:{key}_slat_screen")
+        tool = extra_tool.get(key, "axe")
+        if tool is not None:
+            tools.setdefault(tool, []).append(f"{MODID}:{key}_slats")
+            tools[tool].append(f"{MODID}:{key}_slat_screen")
 
     # Stonecutter recipes: the log/stem/block base cuts into ALL three of its slat variants; the
     # stripped + planks materials each also cut into their own.
@@ -163,6 +199,9 @@ def main():
         for (key, base, tex, disp) in mats[1:]:
             write(f"{DATA}/recipe/{key}_slats_from_{key}_stonecutting.json",
                   stonecut_recipe(base, f"{MODID}:{key}_slats"))
+    for key, base, _tex, _disp, _field, _tool in EXTRAS:
+        write(f"{DATA}/recipe/{key}_slats_from_{key}_stonecutting.json",
+              stonecut_recipe(base, f"{MODID}:{key}_slats"))
 
     # merge into en_us so hand-added (non-slat) entries survive a regen
     lang_path = f"{ASSETS}/lang/en_us.json"
@@ -171,18 +210,33 @@ def main():
         merged.update(lang)
         lang = merged
     write(lang_path, lang)
-    write(f"{RES}/data/minecraft/tags/block/mineable/axe.json", {"replace": False, "values": axe})
+    for tool, values in tools.items():
+        merge_tag(f"{RES}/data/minecraft/tags/block/mineable/{tool}.json", values)
 
     # SlatVariants.java — the key list the registration loops over
     keys = ",\n".join(f'            "{k}"' for k, *_ in vs)
+    bases = ",\n".join(
+        f'            Map.entry("{key}", (Supplier<Block>) () -> Blocks.{field})'
+        for key, _b, _t, _d, field, _tool in EXTRAS)
     java = (
         "package com.beepsterr.fixfoot.content;\n\n"
-        "import java.util.List;\n\n"
+        "import java.util.List;\n"
+        "import java.util.Map;\n"
+        "import java.util.function.Supplier;\n"
+        "import net.minecraft.world.level.block.Block;\n"
+        "import net.minecraft.world.level.block.Blocks;\n\n"
         "/** Generated by tools/gen_slats.py — the slat material variant keys. Do not edit by hand. */\n"
         "public final class SlatVariants {\n"
         "    private SlatVariants() {\n    }\n\n"
         "    public static final List<String> KEYS = List.of(\n"
         f"{keys}\n"
+        "    );\n\n"
+        "    /**\n"
+        "     * Non-wood variants and the vanilla block they copy their properties from, so e.g.\n"
+        "     * glowstone slats glow and magma slats need a pickaxe. Keys absent here are woods.\n"
+        "     */\n"
+        "    public static final Map<String, Supplier<Block>> SPECIAL_BASE = Map.ofEntries(\n"
+        f"{bases}\n"
         "    );\n"
         "}\n"
     )
@@ -191,7 +245,7 @@ def main():
     with open(jpath, "w") as f:
         f.write(java)
 
-    print(f"generated {len(vs)} variants ({len(WOODS)} woods x 3 materials)")
+    print(f"generated {len(vs)} variants ({len(WOODS)} woods x 3 materials + {len(EXTRAS)} extras)")
 
 
 if __name__ == "__main__":

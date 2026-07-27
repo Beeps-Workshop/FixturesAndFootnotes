@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "minecraft:ochre_froglight"
+  },
+  "result": {
+    "count": 8,
+    "id": "fixfoot:ochre_froglight_slats"
+  }
+}

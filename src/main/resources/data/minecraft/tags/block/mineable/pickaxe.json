@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "fixfoot:copper_sheetmetal",
-    "fixfoot:iron_sheetmetal"
+    "fixfoot:iron_sheetmetal",
+    "fixfoot:magma_slats",
+    "fixfoot:magma_slat_screen"
   ]
 }
