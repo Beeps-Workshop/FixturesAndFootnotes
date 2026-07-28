@@ -7,7 +7,7 @@ modId = "${id}"
 version = "${version}"
 displayName = "${name}"
 authors = "Beeps"
-description = "<replace with your mod description>"
+description = "Decoration blocks and hanging fixtures: slat panels in 39 variants, corrugated sheetmetal, wall planters, and storage nets that mount flush to walls and ceilings."
 logoFile = "assets/fixfoot/icon.png"
 
 [[dependencies.${id}]]

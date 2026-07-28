@@ -3,7 +3,7 @@
   "id": "${id}",
   "version": "${version}",
   "name": "${name}",
-  "description": "<replace with your mod description>",
+  "description": "Decoration blocks and hanging fixtures: slat panels in 39 variants, corrugated sheetmetal, wall planters, and storage nets that mount flush to walls and ceilings.",
   "authors": ["Beeps"],
   "license": "ARR",
   "environment": "*",
