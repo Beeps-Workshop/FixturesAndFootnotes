@@ -1,9 +1,13 @@
-name: Build
+name: Tests
 
 # Compile check on every push and PR, so breakage surfaces before release day rather than during it.
-# Builds both loaders for the one Minecraft version that currently compiles — a bare `gradlew build`
-# would also build the 1.21.4 Stonecutter node, which doesn't (see RELEASE.md).
-# .github/workflows/build.yml
+# There's no unit suite here, so this is a build: it compiles both loaders for the one Minecraft
+# version that currently works — a bare `gradlew build` would also build the 1.21.4 Stonecutter
+# node, which doesn't (see RELEASE.md).
+#
+# Named test.yml to match the workshop convention: test.yml runs on push/PR, build_* only on
+# release, dispatch or schedule.
+# .github/workflows/test.yml
 on:
   push:
     branches: [main]
