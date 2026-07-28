@@ -18,14 +18,11 @@ Nothing below ships correctly until these are done.
       `<replace with your mod description>`:
       - `fabric/src/main/resources/fabric.mod.json`
       - `neoforge/src/main/resources/META-INF/neoforge.mods.toml`
-- [ ] **Version number.** `mod.version` in `gradle.properties` is `0.1.0`. Decide whether a public
-      first release should be `1.0.0`. The jar name derives from it.
-- [ ] **Architectury version range.** Both loader metadata files declare `architectury` with an
-      open `*` range, while the build compiles against 13.0.8 (`deps.architectury_api`). A future
-      breaking Architectury release would then fail at runtime rather than being refused at load.
-      Consider narrowing to the current major, e.g. `[13,14)`.
-- [ ] **Licence.** Both files say `ARR` (all rights reserved). Fine if deliberate — worth being a
-      deliberate choice rather than a template leftover, since it governs packs and forks.
+- [x] **Version number.** `mod.version` is `1.0.0`.
+- [x] **Architectury version range.** Left open at `*`. Architectury releases are pinned to
+      Minecraft versions, and the mod already declares `minecraft [1.21, 1.21.1]`, so a breaking
+      Architectury major targeting a newer Minecraft can't be loaded alongside it anyway.
+- [x] **Licence.** `ARR`, deliberately.
 
 ## 2. Build
 
