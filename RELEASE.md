@@ -30,7 +30,13 @@ Nothing below ships correctly until these are done.
       ./gradlew :fabric:1.21.1:build :neoforge:1.21.1:build
       ```
       `chiseledBuild` also builds 1.21.4, which does not compile, so it fails the whole run.
-- [ ] Collect jars from `fabric/build/libs/` and `neoforge/build/libs/`
+- [ ] Collect the two release jars — note Stonecutter puts them under `versions/<mc>/`, not the
+      loader root, and each `libs/` also holds `-sources` and `-dev-shadow` jars you do **not**
+      ship:
+      ```
+      fabric/versions/1.21.1/build/libs/fixfoot-fabric-<version>+1.21.1.jar
+      neoforge/versions/1.21.1/build/libs/fixfoot-neoforge-<version>+1.21.1.jar
+      ```
 - [ ] Confirm the filenames carry the version you settled on above
 - [ ] Install both jars into a clean profile and confirm the mod loads with icon and description
 
