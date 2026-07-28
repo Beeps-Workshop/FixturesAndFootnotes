@@ -143,4 +143,10 @@ jobs:
             1.21
             1.21.1
           files: out/fixfoot-${{ matrix.loader }}-${{ needs.prepare.outputs.version }}+${{ env.MC }}.jar
+          # Architectury is a required runtime dependency, not shaded in — without this declared,
+          # every user installs the mod and it refuses to start. Declaring it lets launchers pull it
+          # in automatically. Resolved by slug; pin as architectury-api(required){modrinth:ID} if a
+          # platform ever fails to resolve it.
+          dependencies: |
+            architectury-api(required)
           changelog: ${{ github.event.release.body || format('Release {0}', needs.prepare.outputs.version) }}

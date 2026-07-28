@@ -20,6 +20,10 @@ Nothing below ships correctly until these are done.
       - `neoforge/src/main/resources/META-INF/neoforge.mods.toml`
 - [ ] **Version number.** `mod.version` in `gradle.properties` is `0.1.0`. Decide whether a public
       first release should be `1.0.0`. The jar name derives from it.
+- [ ] **Architectury version range.** Both loader metadata files declare `architectury` with an
+      open `*` range, while the build compiles against 13.0.8 (`deps.architectury_api`). A future
+      breaking Architectury release would then fail at runtime rather than being refused at load.
+      Consider narrowing to the current major, e.g. `[13,14)`.
 - [ ] **Licence.** Both files say `ARR` (all rights reserved). Fine if deliberate — worth being a
       deliberate choice rather than a template leftover, since it governs packs and forks.
 
@@ -38,7 +42,12 @@ Nothing below ships correctly until these are done.
       neoforge/versions/1.21.1/build/libs/fixfoot-neoforge-<version>+1.21.1.jar
       ```
 - [ ] Confirm the filenames carry the version you settled on above
-- [ ] Install both jars into a clean profile and confirm the mod loads with icon and description
+- [ ] Install both jars into a clean profile and confirm the mod loads with icon and description.
+      **Architectury API must be installed alongside** — it's a required runtime dependency, not
+      bundled, so the mod refuses to start without it. The release workflow declares it so launchers
+      offer it automatically, but a manual install won't.
+- [ ] Test the **Fabric** jar too, not just NeoForge — the loader entrypoints and renderer
+      registration differ, and that's the code most likely to diverge between them
 
 ## 3. Verify in a survival world
 
