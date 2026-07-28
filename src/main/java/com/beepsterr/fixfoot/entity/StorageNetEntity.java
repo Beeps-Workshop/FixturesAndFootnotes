@@ -21,9 +21,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Shared behaviour for the storage nets — chests woven into the architecture rather than standing in
- * the room, after the Avali of Starbound. Subclasses pick a size, a face to hang on, and which
- * vanilla chest menu to open.
+ * Shared behaviour for the storage nets — chests you hang off the building rather than stand on the
+ * floor. Subclasses pick a size, a face to hang on, and which vanilla chest menu to open.
  *
  * <p>Slots are a plain list and reach the client through the open menu like any chest. Separately, a
  * short synched summary of the first {@link #previewCount()} stacks is what the renderer rests in

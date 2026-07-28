@@ -15,22 +15,29 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * A 1x1 net hung from a ceiling, holding a single chest. It sags only {@link #HANG}, leaving the
- * tile below walkable so the storage reads as part of the ceiling rather than an object in the room.
+ * A 1x1 net hung from a ceiling, holding a single chest — a wool frame slung from a copper post,
+ * with a webbing basket inside it.
+ *
+ * <p>It fills most of the block it hangs in rather than staying shallow. Fixtures have no collision,
+ * so nothing is blocked by that, but it reads as a basket hanging in the room rather than something
+ * flush to the ceiling.
  */
 public class SmallStorageNetEntity extends StorageNetEntity {
     /** A single chest. Vanilla's three-row menu and screen handle it, so there's no custom GUI. */
     public static final int SLOTS = 27;
 
-    /** Across the ceiling, and how far it sags below it — shallow enough to keep headroom. */
-    public static final float WIDTH = 0.875F;
-    public static final float HANG = 0.375F;
+    /**
+     * Matched to the model: the wool frame spans the full block footprint and hangs from y=1 up to
+     * the copper post at y=16, so the outline is a full block wide and 15px tall.
+     */
+    public static final float WIDTH = 1.0F;
+    public static final float HANG = 0.9375F;
 
-    /** Just above the net floor (model y=10, so local y=0.125), scattered by hand. */
+    /** Resting on the webbing basket's floor (model y=2, so local y=-0.375), scattered by hand. */
     private static final Vec3[] PREVIEW_LAYOUT = {
-            new Vec3(-0.20D, 0.14D, -0.12D),
-            new Vec3(0.05D, 0.14D, 0.14D),
-            new Vec3(0.22D, 0.14D, -0.05D),
+            new Vec3(-0.20D, -0.34D, -0.12D),
+            new Vec3(0.05D, -0.34D, 0.14D),
+            new Vec3(0.22D, -0.34D, -0.05D),
     };
 
     public SmallStorageNetEntity(EntityType<? extends SmallStorageNetEntity> type, Level level) {
