@@ -7,6 +7,51 @@
     "2": "fixfoot:block/webbing",
     "particle": "minecraft:block/white_wool"
   },
+  "display": {
+    "ground": {
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "gui": {
+      "rotation": [
+        31,
+        48,
+        0
+      ],
+      "translation": [
+        -1.75,
+        -0.25,
+        0
+      ],
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "head": {
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "translation": [
+        0,
+        6,
+        -8.25
+      ]
+    },
+    "fixed": {
+      "translation": [
+        0,
+        0,
+        -7.75
+      ]
+    }
+  },
   "elements": [
     {
       "name": "Connector",
