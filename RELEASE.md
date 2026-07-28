@@ -69,8 +69,6 @@ Decide ship-or-fix for each. None are bugs; all are deliberate current limits.
 - [ ] **1.21.4 does not compile.** `SlatPanelBlock` and `SlatScreenBlock` use APIs removed in
       1.21.2, and there are 4 further seams in the fixture code, each marked `VERSION SEAM`.
       Ship 1.21.1 only and port afterwards.
-- [ ] **Recipes are not in the recipe book.** No unlock advancements, so recipes are craftable but
-      undiscoverable. ~6 formulaic files if you want them.
 - [ ] **Storage Nets cannot be placed side by side.** At 26px wide their hitboxes overlap, so
       `survives()` forces every-other-block spacing.
 - [ ] **Wide Planter uses vanilla placeholder textures** (terracotta + dirt). Its geometry is

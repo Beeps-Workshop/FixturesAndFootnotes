@@ -21,6 +21,9 @@ RES = os.path.join(ROOT, "src/main/resources")
 ASSETS = os.path.join(RES, "assets/fixfoot")
 DATA = os.path.join(RES, "data/fixfoot")
 MODID = "fixfoot"
+# Generated slat advancements go here; hand-written ones live under recipes/decorations so the
+# wipe below can't eat them.
+SLAT_ADVANCEMENTS = "building_blocks"
 
 # wood -> the noun used for its "log" material (log / stem / block)
 WOODS = {
@@ -151,6 +154,37 @@ def stonecut_recipe(base, result_item):
     }
 
 
+def unlock_advancement(recipe_id, ingredient):
+    """
+    Puts a recipe in the recipe book. Without one a recipe is craftable but never shown, so a
+    player with no JEI has no way to discover it. Vanilla's shape: fires either when you first
+    pick up the ingredient or if you were granted the recipe some other way. Parented to the
+    hidden minecraft:recipes/root, so it never appears on the advancements screen.
+    """
+    return {
+        "parent": "minecraft:recipes/root",
+        "criteria": {
+            "has_ingredient": {
+                "trigger": "minecraft:inventory_changed",
+                "conditions": {"items": [{"items": ingredient}]},
+            },
+            "has_the_recipe": {
+                "trigger": "minecraft:recipe_unlocked",
+                "conditions": {"recipe": recipe_id},
+            },
+        },
+        "requirements": [["has_the_recipe", "has_ingredient"]],
+        "rewards": {"recipes": [recipe_id]},
+    }
+
+
+def cut(name, base, result_item):
+    """One stonecutter recipe plus the advancement that makes it discoverable."""
+    write(f"{DATA}/recipe/{name}.json", stonecut_recipe(base, result_item))
+    write(f"{DATA}/advancement/recipes/{SLAT_ADVANCEMENTS}/{name}.json",
+          unlock_advancement(f"{MODID}:{name}", base))
+
+
 def main():
     vs = variants()
 
@@ -189,19 +223,26 @@ def main():
 
     # Stonecutter recipes: the log/stem/block base cuts into ALL three of its slat variants; the
     # stripped + planks materials each also cut into their own.
+    # Only the stonecutting recipes are generated, so the hand-written crafting ones are moved
+    # aside and restored rather than wiped.
+    handwritten = {f: open(f"{DATA}/recipe/{f}").read()
+                   for f in os.listdir(f"{DATA}/recipe") if "stonecutting" not in f} \
+        if os.path.isdir(f"{DATA}/recipe") else {}
     shutil.rmtree(f"{DATA}/recipe", ignore_errors=True)
+    shutil.rmtree(f"{DATA}/advancement/recipes/{SLAT_ADVANCEMENTS}", ignore_errors=True)
+    os.makedirs(f"{DATA}/recipe", exist_ok=True)
+    for name, body in handwritten.items():
+        open(f"{DATA}/recipe/{name}", "w").write(body)
+
     for wood, noun in WOODS.items():
         mats = wood_materials(wood, noun)  # [log, stripped, planks]
         log_key, log_base = mats[0][0], mats[0][1]
         for (key, base, tex, disp) in mats:
-            write(f"{DATA}/recipe/{key}_slats_from_{log_key}_stonecutting.json",
-                  stonecut_recipe(log_base, f"{MODID}:{key}_slats"))
+            cut(f"{key}_slats_from_{log_key}_stonecutting", log_base, f"{MODID}:{key}_slats")
         for (key, base, tex, disp) in mats[1:]:
-            write(f"{DATA}/recipe/{key}_slats_from_{key}_stonecutting.json",
-                  stonecut_recipe(base, f"{MODID}:{key}_slats"))
+            cut(f"{key}_slats_from_{key}_stonecutting", base, f"{MODID}:{key}_slats")
     for key, base, _tex, _disp, _field, _tool in EXTRAS:
-        write(f"{DATA}/recipe/{key}_slats_from_{key}_stonecutting.json",
-              stonecut_recipe(base, f"{MODID}:{key}_slats"))
+        cut(f"{key}_slats_from_{key}_stonecutting", base, f"{MODID}:{key}_slats")
 
     # merge into en_us so hand-added (non-slat) entries survive a regen
     lang_path = f"{ASSETS}/lang/en_us.json"
