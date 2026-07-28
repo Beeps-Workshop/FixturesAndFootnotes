@@ -69,6 +69,15 @@ Decide ship-or-fix for each. None are bugs; all are deliberate current limits.
 
 ## 5. Publish
 
+CI lives in `.github/workflows/`. This repo does **not** use the shared
+`Beeps-Workshop/.github` reusable workflows — it's the workshop's first multi-loader mod and those
+are built around a single jar. See the header of `build_release.yml` for the specifics, and fold it
+back into the shared pair when a second multi-loader mod appears.
+
+- [ ] Set repository variables `MODRINTH_ID` and `CURSEFORGE_ID` once those projects exist —
+      until then the publish job skips and only the GitHub Release is produced
+- [ ] Confirm the org secrets `MODRINTH_TOKEN` / `CURSEFORGE_TOKEN` are visible to this repo
+
 - [ ] Tag the release and merge `wide-planter` into `main`
 - [ ] Push (nothing has been pushed yet)
 - [ ] Write release notes — the commit messages carry the reasoning and are a good source

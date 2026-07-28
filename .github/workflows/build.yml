@@ -1,0 +1,40 @@
+name: Build
+
+# Compile check on every push and PR, so breakage surfaces before release day rather than during it.
+# Builds both loaders for the one Minecraft version that currently compiles — a bare `gradlew build`
+# would also build the 1.21.4 Stonecutter node, which doesn't (see RELEASE.md).
+# .github/workflows/build.yml
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Build both loaders
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :fabric:1.21.1:build :neoforge:1.21.1:build
+
+      - name: Upload jars
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixfoot-dev-${{ github.sha }}
+          path: |
+            fabric/versions/1.21.1/build/libs/fixfoot-fabric-*+1.21.1.jar
+            neoforge/versions/1.21.1/build/libs/fixfoot-neoforge-*+1.21.1.jar
+          retention-days: 14
