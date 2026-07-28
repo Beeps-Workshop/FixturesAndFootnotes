@@ -4,13 +4,14 @@ import com.beepsterr.fixfoot.entity.AttachedFixtureEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
@@ -36,6 +37,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public class AttachedFixtureRenderer<T extends AttachedFixtureEntity> extends EntityRenderer<T> {
     protected final ItemRenderer itemRenderer;
+    private final ModelBlockRenderer modelRenderer;
 
     /** One renderer exists per entity type and the item never varies, so build the stack once. */
     private ItemStack body = ItemStack.EMPTY;
@@ -43,6 +45,7 @@ public class AttachedFixtureRenderer<T extends AttachedFixtureEntity> extends En
     public AttachedFixtureRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.itemRenderer = context.getItemRenderer();
+        this.modelRenderer = context.getBlockRenderDispatcher().getModelRenderer();
     }
 
     @Override
@@ -62,10 +65,17 @@ public class AttachedFixtureRenderer<T extends AttachedFixtureEntity> extends En
         if (body.isEmpty()) {
             body = fixture.getFixtureItem();
         }
-        // ItemDisplayContext.NONE applies no display transform, so the model renders in raw block
-        // space, centred on the origin.
-        itemRenderer.renderStatic(body, ItemDisplayContext.NONE, packedLight,
-                OverlayTexture.NO_OVERLAY, poseStack, buffers, fixture.level(), 0);
+        // Drawn through the model renderer rather than ItemRenderer#renderStatic so the render type
+        // is ours to pick. Fixture items aren't BlockItems, so ItemBlockRenderTypes would fall
+        // through to the translucent sheet, which depth-sorts per quad — fine for a solid trough,
+        // but it makes the netting shimmer where you see one webbing face through another. The
+        // webbing textures are binary alpha, so cutout is both correct and cheaper.
+        poseStack.pushPose();
+        poseStack.translate(-0.5D, -0.5D, -0.5D); // renderStatic did this; renderModel draws from the origin
+        modelRenderer.renderModel(poseStack.last(), buffers.getBuffer(Sheets.cutoutBlockSheet()), null,
+                itemRenderer.getModel(body, fixture.level(), null, 0),
+                1.0F, 1.0F, 1.0F, packedLight, OverlayTexture.NO_OVERLAY);
+        poseStack.popPose();
         renderContents(fixture, poseStack, buffers, packedLight);
 
         poseStack.popPose();
