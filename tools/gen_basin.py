@@ -9,13 +9,19 @@ same for waxed copper), and four fill levels each. Run from the repo root:
 
 Writes blockstates, block + item models, loot tables, recipes with their unlock advancements, and
 the NeoForge oxidation/waxing data maps; merges the en_us and mineable tag entries so hand-added
-lines survive. The geometry constants below are the same numbers CopperBasinBlock declares in
-code (its shape and water height are derived from them) — change the two together.
+lines survive.
+
+The bowl geometry is not written here — it is read from the authored Blockbench export, so
+reshaping the basin means re-exporting and re-running this. Only the water surface is synthesised,
+from the constants below; CopperBasinBlock repeats them for its collision shape.
 """
 import json
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# The authored basin, exported from assets/models/blockbench/CopperBasin.bbmodel. Geometry lives
+# there, not here — this only rebinds its two texture slots per stage and drops the water quad in.
+SOURCE = os.path.join(ROOT, "assets/models/json/CopperBasin.json")
 RES = os.path.join(ROOT, "src/main/resources")
 ASSETS = os.path.join(RES, "assets/fixfoot")
 DATA = os.path.join(RES, "data/fixfoot")
@@ -24,21 +30,22 @@ MODID = "fixfoot"
 # wipes and rebuilds recipes/building_blocks, so nothing of ours can live there.
 ADVANCEMENTS = "decorations"
 
-# Geometry, in pixels. Mirrors CopperBasinBlock: 2px feet, walls to 12, inner floor topping out
-# at 4, water surface at 7/9/11 for levels 1..3 — a pixel below the rim when full.
-FOOT_HEIGHT = 2
-HEIGHT = 12
+# Water geometry, in pixels, read off the authored model: the bowl runs 2..14 across and sits on
+# an inner floor topping out at y=4, with the rim at y=14. Three levels on vanilla's 3px steps,
+# the full one a pixel below the rim. CopperBasinBlock repeats these for its shape — keep in step.
 FLOOR = 4
-WATER_BASE = 5
-WATER_PER_LEVEL = 2
+WATER_PER_LEVEL = 3
 MAX_LEVEL = 3
 
-# prefix, display name, texture — freshest first, matching ModBlocks.BASIN_STAGES.
+# Blockbench texture slot -> the name the per-stage models bind.
+SLOTS = {"0": "body", "1": "feet"}
+
+# prefix, display name, body texture, feet texture — freshest first, matching ModBlocks.BASIN_STAGES.
 STAGES = [
-    ("", "Copper", "minecraft:block/copper_block"),
-    ("exposed_", "Exposed Copper", "minecraft:block/exposed_copper"),
-    ("weathered_", "Weathered Copper", "minecraft:block/weathered_copper"),
-    ("oxidized_", "Oxidized Copper", "minecraft:block/oxidized_copper"),
+    ("", "Copper", "minecraft:block/copper_block", "minecraft:block/copper_grate"),
+    ("exposed_", "Exposed Copper", "minecraft:block/exposed_copper", "minecraft:block/exposed_copper_grate"),
+    ("weathered_", "Weathered Copper", "minecraft:block/weathered_copper", "minecraft:block/weathered_copper_grate"),
+    ("oxidized_", "Oxidized Copper", "minecraft:block/oxidized_copper", "minecraft:block/oxidized_copper_grate"),
 ]
 
 
@@ -57,74 +64,40 @@ def write(path, obj):
         f.write("\n")
 
 
-def faces(spec):
-    """{'north': '#side'} or {'north': ('#side', 'north')} -> model face entries, the 2nd being a cullface."""
-    out = {}
-    for face, value in spec.items():
-        texture, cull = value if isinstance(value, tuple) else (value, None)
-        out[face] = {"texture": texture} if cull is None else {"texture": texture, "cullface": cull}
-    return out
-
-
-def walls():
-    """The four 2px sides. No 'up' cullface — the rim stops at y=12, so a block above can't hide it."""
-    return [
-        {"from": [0, FOOT_HEIGHT, 0], "to": [2, HEIGHT, 16], "faces": faces({
-            "north": ("#side", "north"), "east": "#side", "south": ("#side", "south"),
-            "west": ("#side", "west"), "up": "#top", "down": "#inside"})},
-        {"from": [14, FOOT_HEIGHT, 0], "to": [16, HEIGHT, 16], "faces": faces({
-            "north": ("#side", "north"), "east": ("#side", "east"), "south": ("#side", "south"),
-            "west": "#side", "up": "#top", "down": "#inside"})},
-        {"from": [2, FOOT_HEIGHT, 0], "to": [14, HEIGHT, 2], "faces": faces({
-            "north": ("#side", "north"), "south": "#side", "up": "#top", "down": "#inside"})},
-        {"from": [2, FOOT_HEIGHT, 14], "to": [14, HEIGHT, 16], "faces": faces({
-            "north": "#side", "south": ("#side", "south"), "up": "#top", "down": "#inside"})},
-        # inner floor
-        {"from": [2, FOOT_HEIGHT, 2], "to": [14, FLOOR, 14],
-         "faces": faces({"up": "#inside", "down": "#inside"})},
-    ]
-
-
-def feet():
-    """Four L-shaped corner legs, vanilla's cauldron layout squashed to FOOT_HEIGHT."""
-    legs = [
-        ([0, 0, 0], [4, FOOT_HEIGHT, 2], {"north": ("#side", "north"), "east": "#side",
-                                          "south": "#side", "west": ("#side", "west")}),
-        ([0, 0, 2], [2, FOOT_HEIGHT, 4], {"east": "#side", "south": "#side",
-                                          "west": ("#side", "west")}),
-        ([12, 0, 0], [16, FOOT_HEIGHT, 2], {"north": ("#side", "north"), "east": ("#side", "east"),
-                                            "south": "#side", "west": "#side"}),
-        ([14, 0, 2], [16, FOOT_HEIGHT, 4], {"east": ("#side", "east"), "south": "#side",
-                                            "west": "#side"}),
-        ([0, 0, 14], [4, FOOT_HEIGHT, 16], {"north": "#side", "east": "#side",
-                                            "south": ("#side", "south"), "west": ("#side", "west")}),
-        ([0, 0, 12], [2, FOOT_HEIGHT, 14], {"north": "#side", "east": "#side",
-                                            "west": ("#side", "west")}),
-        ([12, 0, 14], [16, FOOT_HEIGHT, 16], {"north": "#side", "east": ("#side", "east"),
-                                              "south": ("#side", "south"), "west": "#side"}),
-        ([14, 0, 12], [16, FOOT_HEIGHT, 14], {"north": "#side", "east": ("#side", "east"),
-                                              "west": "#side"}),
-    ]
-    out = []
-    for start, end, spec in legs:
-        spec = dict(spec)
-        spec["down"] = ("#bottom", "down")
-        out.append({"from": start, "to": end, "faces": faces(spec)})
-    return out
-
-
 def base_model(level):
-    """Shared geometry for one fill level; the per-stage models just bind the textures."""
-    elements = walls() + feet()
+    """
+    The authored model with its Blockbench slots renamed, plus the water surface for this level.
+
+    Reading the export rather than restating the geometry means re-exporting from Blockbench is
+    the whole edit — the same trick render_icon.py uses for the planter.
+    """
+    src = json.load(open(SOURCE))
+    elements = []
+    for element in src["elements"]:
+        faces = {}
+        for side, face in element.get("faces", {}).items():
+            face = dict(face)
+            face["texture"] = "#" + SLOTS[face["texture"].lstrip("#")]
+            faces[side] = face
+        elements.append({"from": element["from"], "to": element["to"], "faces": faces})
+
     if level > 0:
-        surface = WATER_BASE + WATER_PER_LEVEL * level
         elements.append({
-            "__comment": "Water surface. Flat quad like a cauldron's — no fluid is rendered; "
+            "__comment": "Water surface. A flat quad like a cauldron's — no fluid is rendered; "
                          "tintindex 0 is the biome water colour, applied in FixfootClient.",
-            "from": [2, FLOOR, 2], "to": [14, surface, 14],
+            "from": [2, FLOOR, 2],
+            "to": [14, FLOOR + WATER_PER_LEVEL * level, 14],
             "faces": {"up": {"texture": "#content", "tintindex": 0}},
         })
-    return {"ambientocclusion": False, "textures": {"particle": "#side"}, "elements": elements}
+
+    model = {"ambientocclusion": False, "textures": {"particle": "#body"}, "elements": elements}
+    # The authored item transforms. These models have no parent, so without a display block the
+    # basin item would inherit nothing and render untransformed in the GUI and in hand. Slots
+    # Minecraft doesn't know (Blockbench emits a few newer ones) are ignored on load, so the
+    # export is copied through as-authored.
+    if "display" in src:
+        model["display"] = src["display"]
+    return model
 
 
 def suffix(level):
@@ -182,11 +155,11 @@ def main():
 
     lang = {}
     ids = []
-    for prefix, disp, texture in STAGES:
+    for prefix, disp, body, feet in STAGES:
         stage_id = name(prefix, False)
         # Block models: only the unwaxed stage has them; the waxed twin points at these.
         for level in range(MAX_LEVEL + 1):
-            textures = {slot: texture for slot in ("side", "top", "bottom", "inside")}
+            textures = {"body": body, "feet": feet}
             if level > 0:
                 textures["content"] = "minecraft:block/water_still"
             write(f"{ASSETS}/models/block/{stage_id}{suffix(level)}.json",
@@ -213,7 +186,7 @@ def main():
     }, "minecraft:copper_ingot")
 
     # Waxing is normally a honeycomb interaction; vanilla also ships the crafting shortcut, so match it.
-    for prefix, _disp, _tex in STAGES:
+    for prefix, *_ in STAGES:
         unwaxed, waxed_id = name(prefix, False), name(prefix, True)
         recipe(f"{waxed_id}_from_honeycomb", {
             "type": "minecraft:crafting_shapeless",
@@ -233,7 +206,7 @@ def main():
     }})
     write(f"{maps}/waxables.json", {"replace": False, "values": {
         f"{MODID}:{name(prefix, False)}": {"waxed": f"{MODID}:{name(prefix, True)}"}
-        for prefix, _disp, _tex in STAGES
+        for prefix, *_ in STAGES
     }})
 
     lang_path = f"{ASSETS}/lang/en_us.json"

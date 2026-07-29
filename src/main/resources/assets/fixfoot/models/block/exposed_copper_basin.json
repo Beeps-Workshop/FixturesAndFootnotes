@@ -1,9 +1,7 @@
 {
   "parent": "fixfoot:block/basin_base",
   "textures": {
-    "side": "minecraft:block/exposed_copper",
-    "top": "minecraft:block/exposed_copper",
-    "bottom": "minecraft:block/exposed_copper",
-    "inside": "minecraft:block/exposed_copper"
+    "body": "minecraft:block/exposed_copper",
+    "feet": "minecraft:block/exposed_copper_grate"
   }
 }

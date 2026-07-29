@@ -57,27 +57,27 @@ public class CopperBasinBlock extends Block {
     public static final int MAX_LEVEL = 3;
 
     /**
-     * Geometry in pixels, kept in step with the generated models — {@code tools/gen_basin.py}
-     * declares the same four numbers and builds the JSON from them, so change both together.
-     * Feet run 0..2, walls 2..12, the inner floor tops out at 4, and the water surface sits at
-     * 7/9/11 for levels 1..3 — a pixel below the rim when full, the way a cauldron reads.
+     * Geometry in pixels, tracing the authored model (assets/models/blockbench/CopperBasin.bbmodel,
+     * which {@code tools/gen_basin.py} reads to build the block models): four L-shaped feet run
+     * 0..2, a solid base slab 2..4, and the bowl walls 4..14 around a 2..14 interior. The water
+     * surface sits at 7/10/13 for levels 1..3 — a pixel below the rim when full, as a cauldron reads.
      */
     private static final int FOOT_HEIGHT = 2;
-    private static final int HEIGHT = 12;
     private static final int FLOOR = 4;
-    private static final int WATER_BASE = 5;
-    private static final int WATER_PER_LEVEL = 2;
+    private static final int RIM = 14;
+    private static final int WATER_PER_LEVEL = 3;
 
-    private static final VoxelShape INSIDE = box(2.0, FLOOR, 2.0, 14.0, HEIGHT, 14.0);
-    /** The basin's bounding box minus the gaps between the feet and minus the bowl. */
-    private static final VoxelShape SHAPE = Shapes.join(
-            box(0.0, 0.0, 0.0, 16.0, HEIGHT, 16.0),
-            Shapes.or(
-                    box(0.0, 0.0, 4.0, 16.0, FOOT_HEIGHT, 12.0),
-                    box(4.0, 0.0, 0.0, 12.0, FOOT_HEIGHT, 16.0),
-                    box(2.0, 0.0, 2.0, 14.0, FOOT_HEIGHT, 14.0),
-                    INSIDE),
-            BooleanOp.ONLY_FIRST);
+    private static final VoxelShape INSIDE = box(2.0, FLOOR, 2.0, 14.0, RIM, 14.0);
+    private static final VoxelShape SHAPE = Shapes.or(
+            // Feet: an L at each corner, leaving the gaps between them open.
+            box(0.0, 0.0, 0.0, 2.0, FOOT_HEIGHT, 4.0), box(0.0, 0.0, 0.0, 4.0, FOOT_HEIGHT, 2.0),
+            box(14.0, 0.0, 0.0, 16.0, FOOT_HEIGHT, 4.0), box(12.0, 0.0, 0.0, 16.0, FOOT_HEIGHT, 2.0),
+            box(0.0, 0.0, 12.0, 2.0, FOOT_HEIGHT, 16.0), box(0.0, 0.0, 14.0, 4.0, FOOT_HEIGHT, 16.0),
+            box(14.0, 0.0, 12.0, 16.0, FOOT_HEIGHT, 16.0), box(12.0, 0.0, 14.0, 16.0, FOOT_HEIGHT, 16.0),
+            // Base slab, then the four walls ringing the bowl.
+            box(0.0, FOOT_HEIGHT, 0.0, 16.0, FLOOR, 16.0),
+            box(0.0, FLOOR, 0.0, 16.0, RIM, 2.0), box(0.0, FLOOR, 14.0, 16.0, RIM, 16.0),
+            box(0.0, FLOOR, 2.0, 2.0, RIM, 14.0), box(14.0, FLOOR, 2.0, 16.0, RIM, 14.0));
 
     public CopperBasinBlock(Properties properties) {
         super(properties);
@@ -122,7 +122,7 @@ public class CopperBasinBlock extends Block {
 
     /** Height of the water surface as a fraction of the block, matching the model's content quad. */
     private static double contentHeight(BlockState state) {
-        return (WATER_BASE + WATER_PER_LEVEL * state.getValue(LEVEL)) / 16.0;
+        return (FLOOR + WATER_PER_LEVEL * state.getValue(LEVEL)) / 16.0;
     }
 
     private static void setLevel(BlockState state, Level level, BlockPos pos, int fill) {

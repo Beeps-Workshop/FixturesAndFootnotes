@@ -1,9 +1,7 @@
 {
   "parent": "fixfoot:block/basin_base",
   "textures": {
-    "side": "minecraft:block/weathered_copper",
-    "top": "minecraft:block/weathered_copper",
-    "bottom": "minecraft:block/weathered_copper",
-    "inside": "minecraft:block/weathered_copper"
+    "body": "minecraft:block/weathered_copper",
+    "feet": "minecraft:block/weathered_copper_grate"
   }
 }
