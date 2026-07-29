@@ -22,7 +22,6 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -38,7 +37,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  */
 public class CopperDrainBlock extends Block {
     public static final MapCodec<? extends Block> CODEC = simpleCodec(CopperDrainBlock::new);
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<Flow> FLOW = EnumProperty.create("flow", Flow.class);
 
     /** What is coming out of the mouth. */

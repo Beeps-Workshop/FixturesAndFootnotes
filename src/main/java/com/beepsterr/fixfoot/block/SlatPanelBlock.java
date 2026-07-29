@@ -9,7 +9,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
+import com.beepsterr.fixfoot.compat.Interactions;
+import net.minecraft.world.InteractionResult;
+//? if <1.21.2 {
 import net.minecraft.world.ItemInteractionResult;
+//?}
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
@@ -158,8 +162,13 @@ public class SlatPanelBlock extends MultifaceBlock {
     }
 
     @Override
+    //? if >=1.21.2 {
+    /*protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+                                          Player player, InteractionHand hand, BlockHitResult hit) {
+    *///?} else {
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
+    //?}
         Overlay overlay = state.getValue(OVERLAY);
         // Cover bare slats with vines or pink petals. Covered slats take neither — shear first,
         // so swapping the look is deliberate rather than a misclick with a stack of petals.
@@ -171,7 +180,7 @@ public class SlatPanelBlock extends MultifaceBlock {
                     stack.shrink(1);
                 }
             }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return Interactions.used(level);
         }
         // Strip the overlay back off with shears.
         if (overlay != Overlay.NONE && stack.is(Items.SHEARS)) {
@@ -179,9 +188,9 @@ public class SlatPanelBlock extends MultifaceBlock {
                 level.setBlock(pos, state.setValue(OVERLAY, Overlay.NONE), Block.UPDATE_ALL);
                 Block.popResource(level, pos, new ItemStack(overlay.item()));
             }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return Interactions.used(level);
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return Interactions.passToBlock();
     }
 
     @Override

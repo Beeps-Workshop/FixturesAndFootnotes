@@ -2,6 +2,7 @@ package com.beepsterr.fixfoot.entity;
 
 import java.util.Objects;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -196,9 +197,16 @@ public abstract class AttachedFixtureEntity extends HangingEntity {
 
     @Override
     public void dropItem(Entity breaker) {
+        //? if >=1.21.2 {
+        /*if (!(level() instanceof ServerLevel server)
+                || !server.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+            return;
+        }
+        *///?} else {
         if (!level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             return;
         }
+        //?}
         playSound(getBreakSound(), 1.0F, 1.0F);
         // Vanilla item-frame rule: a creative player doesn't get the fixture itself back, but
         // whatever it was holding still drops.

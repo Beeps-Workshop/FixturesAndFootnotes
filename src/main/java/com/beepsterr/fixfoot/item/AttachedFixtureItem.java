@@ -3,6 +3,7 @@ package com.beepsterr.fixfoot.item;
 import com.beepsterr.fixfoot.entity.AttachedFixtureEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import com.beepsterr.fixfoot.compat.Interactions;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -52,6 +53,6 @@ public class AttachedFixtureItem extends Item {
             level.addFreshEntity(fixture);
             stack.shrink(1);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return Interactions.sided(level);
     }
 }

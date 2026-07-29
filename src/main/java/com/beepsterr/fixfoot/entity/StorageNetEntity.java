@@ -12,6 +12,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
+import com.beepsterr.fixfoot.compat.Interactions;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EntityType;
@@ -107,7 +108,7 @@ public abstract class StorageNetEntity extends AttachedFixtureEntity implements 
         if (!level().isClientSide) {
             player.openMenu(this);
         }
-        return InteractionResult.sidedSuccess(level().isClientSide);
+        return Interactions.sided(level());
     }
 
     @Override

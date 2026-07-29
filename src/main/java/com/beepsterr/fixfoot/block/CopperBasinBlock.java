@@ -8,7 +8,11 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
+import com.beepsterr.fixfoot.compat.Interactions;
+import net.minecraft.world.InteractionResult;
+//? if <1.21.2 {
 import net.minecraft.world.ItemInteractionResult;
+//?}
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -144,8 +148,13 @@ public class CopperBasinBlock extends Block {
     }
 
     @Override
+    //? if >=1.21.2 {
+    /*protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+                                          Player player, InteractionHand hand, BlockHitResult hit) {
+    *///?} else {
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
+    //?}
         int fill = state.getValue(LEVEL);
 
         // A bucket always fills to the brim, however little was in there — same as a cauldron.
@@ -158,7 +167,7 @@ public class CopperBasinBlock extends Block {
                 level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
                 level.gameEvent(null, GameEvent.FLUID_PLACE, pos);
             }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return Interactions.used(level);
         }
 
         // ...and only a full basin gives one back, so three bottles can't become a bucket.
@@ -172,7 +181,7 @@ public class CopperBasinBlock extends Block {
                 level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
                 level.gameEvent(null, GameEvent.FLUID_PICKUP, pos);
             }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return Interactions.used(level);
         }
 
         if (stack.is(Items.GLASS_BOTTLE) && fill > 0) {
@@ -185,7 +194,7 @@ public class CopperBasinBlock extends Block {
                 level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
                 level.gameEvent(null, GameEvent.FLUID_PICKUP, pos);
             }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return Interactions.used(level);
         }
 
         if (stack.is(Items.POTION) && fill < MAX_LEVEL) {
@@ -200,7 +209,7 @@ public class CopperBasinBlock extends Block {
                     level.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
                     level.gameEvent(null, GameEvent.FLUID_PLACE, pos);
                 }
-                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+                return Interactions.used(level);
             }
         }
 
@@ -213,7 +222,7 @@ public class CopperBasinBlock extends Block {
                     player.awardStat(Stats.CLEAN_ARMOR);
                     setLevel(state, level, pos, fill - 1);
                 }
-                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+                return Interactions.used(level);
             }
 
             BannerPatternLayers patterns = stack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
@@ -225,7 +234,7 @@ public class CopperBasinBlock extends Block {
                     player.awardStat(Stats.CLEAN_BANNER);
                     setLevel(state, level, pos, fill - 1);
                 }
-                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+                return Interactions.used(level);
             }
 
             if (Block.byItem(stack.getItem()) instanceof ShulkerBoxBlock) {
@@ -236,12 +245,12 @@ public class CopperBasinBlock extends Block {
                     player.awardStat(Stats.CLEAN_SHULKER_BOX);
                     setLevel(state, level, pos, fill - 1);
                 }
-                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+                return Interactions.used(level);
             }
         }
 
         // Honeycomb and axes fall through to the item, which is what applies/strips the wax.
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return Interactions.passToBlock();
     }
 
     /** Douses anything burning that steps in, spending a layer like a cauldron does. */

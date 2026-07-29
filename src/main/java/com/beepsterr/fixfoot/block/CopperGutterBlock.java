@@ -20,7 +20,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -42,7 +41,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  */
 public class CopperGutterBlock extends Block {
     public static final MapCodec<? extends Block> CODEC = simpleCodec(CopperGutterBlock::new);
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<GutterShape> SHAPE = EnumProperty.create("shape", GutterShape.class);
     /** Carrying water. Set by rain, spread along the run, cleared when the weather turns. */
     public static final BooleanProperty FILLED = BooleanProperty.create("filled");

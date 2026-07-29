@@ -16,6 +16,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import com.beepsterr.fixfoot.compat.Interactions;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -114,7 +115,11 @@ public class WidePlanterEntity extends AttachedFixtureEntity {
         if (!(stack.getItem() instanceof BlockItem blockItem)) {
             return false;
         }
+        //? if >=1.21.2 {
+        /*if (stack.is(ItemTags.SAPLINGS) || stack.is(ItemTags.SMALL_FLOWERS)) {
+        *///?} else {
         if (stack.is(ItemTags.SAPLINGS) || stack.is(ItemTags.FLOWERS)) {
+        //?}
             return true;
         }
         // Seeds, carrots and potatoes are all ItemNameBlockItems pointing at their planted block.
@@ -206,7 +211,7 @@ public class WidePlanterEntity extends AttachedFixtureEntity {
                 setPlant(slot, ItemStack.EMPTY);
                 playSound(SoundEvents.CROP_BREAK, 1.0F, 1.0F);
             }
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return Interactions.sided(level());
         }
 
         ItemStack held = player.getItemInHand(hand);
@@ -218,7 +223,7 @@ public class WidePlanterEntity extends AttachedFixtureEntity {
                 }
                 playSound(SoundEvents.CROP_PLANTED, 1.0F, 1.0F);
             }
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return Interactions.sided(level());
         }
 
         return InteractionResult.PASS;
