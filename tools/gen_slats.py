@@ -106,16 +106,25 @@ def bars(z0, z1):
     return {"textures": {"particle": "#0"}, "elements": els}
 
 
+FACES = (("north", 0), ("east", 90), ("south", 180), ("west", 270))
+
+# SlatPanelBlock.Overlay value -> the model drawn a pixel in front of the bars. One enum property
+# rather than a boolean each, so the overlays stay mutually exclusive without inflating the states.
+OVERLAYS = {
+    "vine": f"{MODID}:block/slats_vine_overlay",
+    "pink_petals": f"{MODID}:block/slats_petals_overlay",
+}
+
+
 def wall_blockstate(key):
+    def apply(model, y):
+        return {"model": model} if y == 0 else {"model": model, "y": y}
+
     m = f"{MODID}:block/{key}_slats"
-    vine = f"{MODID}:block/slats_vine_overlay"
-    mp = []
-    for face, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
-        a = {"model": m} if y == 0 else {"model": m, "y": y}
-        mp.append({"when": {face: "true"}, "apply": a})
-    for face, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
-        a = {"model": vine} if y == 0 else {"model": vine, "y": y}
-        mp.append({"when": {face: "true", "vined": "true"}, "apply": a})
+    mp = [{"when": {face: "true"}, "apply": apply(m, y)} for face, y in FACES]
+    for overlay, model in OVERLAYS.items():
+        for face, y in FACES:
+            mp.append({"when": {face: "true", "overlay": overlay}, "apply": apply(model, y)})
     return {"multipart": mp}
 
 

@@ -38,7 +38,7 @@
     {
       "when": {
         "north": "true",
-        "vined": "true"
+        "overlay": "vine"
       },
       "apply": {
         "model": "fixfoot:block/slats_vine_overlay"
@@ -47,7 +47,7 @@
     {
       "when": {
         "east": "true",
-        "vined": "true"
+        "overlay": "vine"
       },
       "apply": {
         "model": "fixfoot:block/slats_vine_overlay",
@@ -57,7 +57,7 @@
     {
       "when": {
         "south": "true",
-        "vined": "true"
+        "overlay": "vine"
       },
       "apply": {
         "model": "fixfoot:block/slats_vine_overlay",
@@ -67,10 +67,49 @@
     {
       "when": {
         "west": "true",
-        "vined": "true"
+        "overlay": "vine"
       },
       "apply": {
         "model": "fixfoot:block/slats_vine_overlay",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "overlay": "pink_petals"
+      },
+      "apply": {
+        "model": "fixfoot:block/slats_petals_overlay"
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "overlay": "pink_petals"
+      },
+      "apply": {
+        "model": "fixfoot:block/slats_petals_overlay",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "overlay": "pink_petals"
+      },
+      "apply": {
+        "model": "fixfoot:block/slats_petals_overlay",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "overlay": "pink_petals"
+      },
+      "apply": {
+        "model": "fixfoot:block/slats_petals_overlay",
         "y": 270
       }
     }

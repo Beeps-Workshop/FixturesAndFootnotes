@@ -4,12 +4,15 @@ import com.mojang.serialization.MapCodec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -21,7 +24,7 @@ import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.MultifaceSpreader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -34,21 +37,58 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * 1-wide walkway can carry slats on both sides in the same block. Registered {@code .noCollission()}
  * so you can walk through the 2px slats and they overlap block space.
  *
- * <p>Optional overgrown look: use a Vine on a slat to cover it (a {@link #VINED} overlay renders
- * ~1px in front of the bars, biome-tinted green via a client color handler); Shears strip it back.
+ * <p>Optional overgrown look: use a Vine or Pink Petals on a slat to cover it (an {@link #OVERLAY}
+ * renders ~1px in front of the bars); Shears strip it back. Vines and petals share one enum
+ * property rather than taking a boolean each, so they're mutually exclusive by construction and
+ * the state count grows by half instead of doubling.
  */
 public class SlatPanelBlock extends MultifaceBlock {
     public static final MapCodec<SlatPanelBlock> CODEC = simpleCodec(SlatPanelBlock::new);
-    public static final BooleanProperty VINED = BooleanProperty.create("vined");
+    public static final EnumProperty<Overlay> OVERLAY = EnumProperty.create("overlay", Overlay.class);
+
+    /** What has grown over the bars. One at a time — shear it off before applying the other. */
+    public enum Overlay implements StringRepresentable {
+        NONE("none", () -> Items.AIR),
+        VINE("vine", () -> Items.VINE),
+        PINK_PETALS("pink_petals", () -> Items.PINK_PETALS);
+
+        private final String name;
+        private final Supplier<Item> item;
+
+        Overlay(String name, Supplier<Item> item) {
+            this.name = name;
+            this.item = item;
+        }
+
+        /** The item that applies this overlay, and that Shears hand back. */
+        public Item item() {
+            return item.get();
+        }
+
+        @Override
+        public String getSerializedName() {
+            return name;
+        }
+
+        /** The overlay {@code stack} would apply, or {@link #NONE} if it isn't an overlay item. */
+        public static Overlay forItem(ItemStack stack) {
+            for (Overlay overlay : values()) {
+                if (overlay != NONE && stack.is(overlay.item())) {
+                    return overlay;
+                }
+            }
+            return NONE;
+        }
+    }
 
     /**
      * Depth of the shape per placed face, in pixels, matching the authored model: bars run 0..2,
-     * and the vine overlay adds a plane one pixel further out. Vanilla {@link MultifaceBlock}
+     * and an overlay adds a plane one pixel further out. Vanilla {@link MultifaceBlock}
      * hard-codes 1px, which left the outline short of the bars — enough that anything measuring it
      * (a fixture attaching itself to the slats) ended up sitting inside the model.
      */
     private static final int BAR_DEPTH = 2;
-    private static final int VINED_DEPTH = 3;
+    private static final int OVERLAY_DEPTH = 3;
 
     // MultifaceBlock requires a spreader (used by growth/bonemeal spreading). We never trigger
     // spreading, but the abstract method must return non-null.
@@ -57,7 +97,7 @@ public class SlatPanelBlock extends MultifaceBlock {
 
     public SlatPanelBlock(Properties properties) {
         super(properties);
-        registerDefaultState(defaultBlockState().setValue(VINED, false));
+        registerDefaultState(defaultBlockState().setValue(OVERLAY, Overlay.NONE));
         this.shapes = getShapeForEachState(SlatPanelBlock::calculateShape);
     }
 
@@ -68,7 +108,7 @@ public class SlatPanelBlock extends MultifaceBlock {
 
     /** Union of one slab per placed face. Registered {@code .noCollission()}, so this is the outline only. */
     private static VoxelShape calculateShape(BlockState state) {
-        int depth = state.getValue(VINED) ? VINED_DEPTH : BAR_DEPTH;
+        int depth = state.getValue(OVERLAY) == Overlay.NONE ? BAR_DEPTH : OVERLAY_DEPTH;
         VoxelShape shape = Shapes.empty();
         for (Direction face : Direction.values()) {
             if (hasFace(state, face)) {
@@ -97,7 +137,7 @@ public class SlatPanelBlock extends MultifaceBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(VINED);
+        builder.add(OVERLAY);
     }
 
     @Override
@@ -120,21 +160,24 @@ public class SlatPanelBlock extends MultifaceBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
-        // Cover the slats with vines.
-        if (!state.getValue(VINED) && stack.is(Items.VINE)) {
+        Overlay overlay = state.getValue(OVERLAY);
+        // Cover bare slats with vines or pink petals. Covered slats take neither — shear first,
+        // so swapping the look is deliberate rather than a misclick with a stack of petals.
+        Overlay applied = Overlay.forItem(stack);
+        if (overlay == Overlay.NONE && applied != Overlay.NONE) {
             if (!level.isClientSide) {
-                level.setBlock(pos, state.setValue(VINED, true), Block.UPDATE_ALL);
+                level.setBlock(pos, state.setValue(OVERLAY, applied), Block.UPDATE_ALL);
                 if (!player.getAbilities().instabuild) {
                     stack.shrink(1);
                 }
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
-        // Strip the vines back off with shears.
-        if (state.getValue(VINED) && stack.is(Items.SHEARS)) {
+        // Strip the overlay back off with shears.
+        if (overlay != Overlay.NONE && stack.is(Items.SHEARS)) {
             if (!level.isClientSide) {
-                level.setBlock(pos, state.setValue(VINED, false), Block.UPDATE_ALL);
-                Block.popResource(level, pos, new ItemStack(Items.VINE));
+                level.setBlock(pos, state.setValue(OVERLAY, Overlay.NONE), Block.UPDATE_ALL);
+                Block.popResource(level, pos, new ItemStack(overlay.item()));
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
@@ -158,7 +201,7 @@ public class SlatPanelBlock extends MultifaceBlock {
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
-        // One slat per placed face, plus the vine back if it was covered.
+        // One slat per placed face, plus the overlay item back if it was covered.
         int faces = 0;
         for (Direction direction : Direction.values()) {
             if (hasFace(state, direction)) {
@@ -167,8 +210,9 @@ public class SlatPanelBlock extends MultifaceBlock {
         }
         List<ItemStack> drops = new ArrayList<>();
         drops.add(new ItemStack(this, Math.max(1, faces)));
-        if (state.getValue(VINED)) {
-            drops.add(new ItemStack(Items.VINE));
+        Overlay overlay = state.getValue(OVERLAY);
+        if (overlay != Overlay.NONE) {
+            drops.add(new ItemStack(overlay.item()));
         }
         return drops;
     }
