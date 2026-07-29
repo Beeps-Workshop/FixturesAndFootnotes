@@ -66,7 +66,11 @@ loom {
         get("vineflower").apply { options.put("mark-corresponding-synthetics", "1") }
     }
     runConfigs.all {
-        isIdeConfigGenerated = true
+        // Off deliberately. Loom's generated IDE configs are Application-type and bound to module
+        // names like FixturesAndFootnotes.fabric.1.21.1.main, which is not how this Stonecutter
+        // tree gets imported — so every one of them showed up broken, both versions. The working
+        // configs are the Gradle-type ones in .run/, which just invoke the task and always resolve.
+        isIdeConfigGenerated = false
         runDir = "../../run"
         vmArgs("-Dmixin.debug.export=true")
     }

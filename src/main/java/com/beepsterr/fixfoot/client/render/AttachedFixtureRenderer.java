@@ -122,10 +122,12 @@ public class AttachedFixtureRenderer<T extends AttachedFixtureEntity>
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - from.yRot));
 
         poseStack.pushPose();
-        poseStack.translate(-0.5D, -0.5D, -0.5D); // both paths draw from the origin outwards
         //? if >=1.21.2 {
-        /*from.bodyModel.render(poseStack, buffers, packedLight, OverlayTexture.NO_OVERLAY);
+        /*// No recentring here: the render state is the item pipeline, which applies its own,
+        // and doing it again shifts the fixture a whole block out from what it hangs on.
+        from.bodyModel.render(poseStack, buffers, packedLight, OverlayTexture.NO_OVERLAY);
         *///?} else {
+        poseStack.translate(-0.5D, -0.5D, -0.5D); // renderModel draws from the origin outwards
         // Drawn through the model renderer rather than ItemRenderer#renderStatic so the render type
         // is ours to pick. Fixture items aren't BlockItems, so ItemBlockRenderTypes would fall
         // through to the translucent sheet, which depth-sorts per quad — fine for a solid trough,

@@ -22,6 +22,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -35,11 +37,13 @@ public final class ModBlocks {
 
     public static final RegistrySupplier<Block> COPPER_SHEETMETAL = BLOCKS.register(
             "copper_sheetmetal",
-            () -> new SheetmetalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_BLOCK)));
+            () -> new SheetmetalBlock(identified("copper_sheetmetal",
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_BLOCK))));
 
     public static final RegistrySupplier<Block> IRON_SHEETMETAL = BLOCKS.register(
             "iron_sheetmetal",
-            () -> new SheetmetalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)));
+            () -> new SheetmetalBlock(identified("iron_sheetmetal",
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK))));
 
     /**
      * The copper oxidation chain, freshest first: each stage weathers into the next, and each has
@@ -86,14 +90,29 @@ public final class ModBlocks {
             boolean waxedStillTicks) {
         for (WeatheringCopper.WeatherState stage : COPPER_STAGES) {
             String id = copperName(stage, false, family);
-            COPPER.put(id, BLOCKS.register(id, () -> ageing.apply(stage, copperProperties(Blocks.COPPER_BLOCK))));
+            COPPER.put(id, BLOCKS.register(id,
+                    () -> ageing.apply(stage, identified(id, copperProperties(Blocks.COPPER_BLOCK)))));
         }
         for (WeatheringCopper.WeatherState stage : COPPER_STAGES) {
             String id = copperName(stage, true, family);
             BlockBehaviour.Properties properties = copperProperties(Blocks.WAXED_COPPER_BLOCK);
-            COPPER.put(id, BLOCKS.register(id,
-                    () -> waxed.apply(waxedStillTicks ? properties.randomTicks() : properties)));
+            COPPER.put(id, BLOCKS.register(id, () -> waxed.apply(
+                    identified(id, waxedStillTicks ? properties.randomTicks() : properties))));
         }
+    }
+
+    /**
+     * Stamps a block's registry id onto its properties, which 1.21.2 made a requirement — the
+     * properties are read during construction, before registration, so a block built without one
+     * throws "Block id not set" rather than failing to compile.
+     */
+    private static BlockBehaviour.Properties identified(String name, BlockBehaviour.Properties properties) {
+        //? if >=1.21.2 {
+        /*return properties.setId(ResourceKey.create(Registries.BLOCK,
+                ResourceLocation.fromNamespaceAndPath(Fixfoot.MOD_ID, name)));
+        *///?} else {
+        return properties;
+        //?}
     }
 
     /** Copper's hardness, sound and tool, but open so it doesn't cull its neighbours. */
@@ -104,9 +123,11 @@ public final class ModBlocks {
     static {
         for (String key : SlatVariants.KEYS) {
             WALL.put(key, BLOCKS.register(key + "_slats",
-                    () -> new SlatPanelBlock(slatProperties(key).noOcclusion().noCollission())));
+                    () -> new SlatPanelBlock(identified(key + "_slats",
+                            slatProperties(key).noOcclusion().noCollission()))));
             SCREEN.put(key, BLOCKS.register(key + "_slat_screen",
-                    () -> new SlatScreenBlock(slatProperties(key).noOcclusion())));
+                    () -> new SlatScreenBlock(identified(key + "_slat_screen",
+                            slatProperties(key).noOcclusion()))));
         }
     }
 
