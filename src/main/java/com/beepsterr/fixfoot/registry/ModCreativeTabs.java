@@ -6,6 +6,7 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public final class ModCreativeTabs {
@@ -22,6 +23,9 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.STORAGE_NET.get());
                         output.accept(ModItems.COPPER_SHEETMETAL.get());
                         output.accept(ModItems.IRON_SHEETMETAL.get());
+                        for (RegistrySupplier<Item> basin : ModItems.BASIN_ITEMS.values()) {
+                            output.accept(basin.get());
+                        }
                         for (String key : com.beepsterr.fixfoot.content.SlatVariants.KEYS) {
                             output.accept(ModItems.SLAT_ITEMS.get(key).get());
                         }

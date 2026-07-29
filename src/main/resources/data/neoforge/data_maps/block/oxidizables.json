@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": {
+    "fixfoot:copper_basin": {
+      "next_oxidation_stage": "fixfoot:exposed_copper_basin"
+    },
+    "fixfoot:exposed_copper_basin": {
+      "next_oxidation_stage": "fixfoot:weathered_copper_basin"
+    },
+    "fixfoot:weathered_copper_basin": {
+      "next_oxidation_stage": "fixfoot:oxidized_copper_basin"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "parent": "fixfoot:block/basin_base_level3",
+  "textures": {
+    "side": "minecraft:block/oxidized_copper",
+    "top": "minecraft:block/oxidized_copper",
+    "bottom": "minecraft:block/oxidized_copper",
+    "inside": "minecraft:block/oxidized_copper",
+    "content": "minecraft:block/water_still"
+  }
+}

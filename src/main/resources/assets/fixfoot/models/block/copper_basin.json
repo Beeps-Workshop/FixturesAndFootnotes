@@ -1,0 +1,9 @@
+{
+  "parent": "fixfoot:block/basin_base",
+  "textures": {
+    "side": "minecraft:block/copper_block",
+    "top": "minecraft:block/copper_block",
+    "bottom": "minecraft:block/copper_block",
+    "inside": "minecraft:block/copper_block"
+  }
+}

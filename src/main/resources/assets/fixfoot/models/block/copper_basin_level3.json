@@ -1,0 +1,10 @@
+{
+  "parent": "fixfoot:block/basin_base_level3",
+  "textures": {
+    "side": "minecraft:block/copper_block",
+    "top": "minecraft:block/copper_block",
+    "bottom": "minecraft:block/copper_block",
+    "inside": "minecraft:block/copper_block",
+    "content": "minecraft:block/water_still"
+  }
+}

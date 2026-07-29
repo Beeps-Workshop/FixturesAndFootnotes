@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "waxed_copper_basin",
+  "ingredients": [
+    {
+      "item": "fixfoot:oxidized_copper_basin"
+    },
+    {
+      "item": "minecraft:honeycomb"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "fixfoot:waxed_oxidized_copper_basin"
+  }
+}

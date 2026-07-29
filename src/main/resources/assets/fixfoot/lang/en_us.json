@@ -86,5 +86,13 @@
   "block.fixfoot.pearlescent_froglight_slat_screen": "Pearlescent Froglight Slat Screen",
   "block.fixfoot.magma_slats": "Magma Slats",
   "block.fixfoot.magma_slat_screen": "Magma Slat Screen",
-  "block.fixfoot.display_fixture": "Display Fixture"
+  "block.fixfoot.display_fixture": "Display Fixture",
+  "block.fixfoot.copper_basin": "Copper Basin",
+  "block.fixfoot.waxed_copper_basin": "Waxed Copper Basin",
+  "block.fixfoot.exposed_copper_basin": "Exposed Copper Basin",
+  "block.fixfoot.waxed_exposed_copper_basin": "Waxed Exposed Copper Basin",
+  "block.fixfoot.weathered_copper_basin": "Weathered Copper Basin",
+  "block.fixfoot.waxed_weathered_copper_basin": "Waxed Weathered Copper Basin",
+  "block.fixfoot.oxidized_copper_basin": "Oxidized Copper Basin",
+  "block.fixfoot.waxed_oxidized_copper_basin": "Waxed Oxidized Copper Basin"
 }

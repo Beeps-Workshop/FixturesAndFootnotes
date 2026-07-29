@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "level=0": {
+      "model": "fixfoot:block/exposed_copper_basin"
+    },
+    "level=1": {
+      "model": "fixfoot:block/exposed_copper_basin_level1"
+    },
+    "level=2": {
+      "model": "fixfoot:block/exposed_copper_basin_level2"
+    },
+    "level=3": {
+      "model": "fixfoot:block/exposed_copper_basin_level3"
+    }
+  }
+}

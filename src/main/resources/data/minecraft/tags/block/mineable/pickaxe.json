@@ -4,6 +4,14 @@
     "fixfoot:copper_sheetmetal",
     "fixfoot:iron_sheetmetal",
     "fixfoot:magma_slats",
-    "fixfoot:magma_slat_screen"
+    "fixfoot:magma_slat_screen",
+    "fixfoot:copper_basin",
+    "fixfoot:waxed_copper_basin",
+    "fixfoot:exposed_copper_basin",
+    "fixfoot:waxed_exposed_copper_basin",
+    "fixfoot:weathered_copper_basin",
+    "fixfoot:waxed_weathered_copper_basin",
+    "fixfoot:oxidized_copper_basin",
+    "fixfoot:waxed_oxidized_copper_basin"
   ]
 }

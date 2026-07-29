@@ -7,6 +7,7 @@ import com.beepsterr.fixfoot.registry.ModBlocks;
 import com.beepsterr.fixfoot.registry.ModEntities;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
+import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.RenderType;
@@ -43,6 +44,14 @@ public final class FixfootClient {
             Block wall = ModBlocks.WALL.get(key).get();
             RenderTypeRegistry.register(RenderType.cutout(), wall); // cutout so the vine shows through
             ColorHandlerRegistry.registerBlockColors(foliage, wall);
+        }
+
+        // Same deal for the basin's water surface (tintindex 0 on the content quad), tinted per
+        // biome like a cauldron's. The copper itself is untinted, so it needs no index.
+        BlockColor water = (state, level, pos, tintIndex) ->
+                (level != null && pos != null) ? BiomeColors.getAverageWaterColor(level, pos) : -1;
+        for (RegistrySupplier<Block> basin : ModBlocks.BASINS.values()) {
+            ColorHandlerRegistry.registerBlockColors(water, basin.get());
         }
     }
 

@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": {
+    "fixfoot:copper_basin": {
+      "waxed": "fixfoot:waxed_copper_basin"
+    },
+    "fixfoot:exposed_copper_basin": {
+      "waxed": "fixfoot:waxed_exposed_copper_basin"
+    },
+    "fixfoot:weathered_copper_basin": {
+      "waxed": "fixfoot:waxed_weathered_copper_basin"
+    },
+    "fixfoot:oxidized_copper_basin": {
+      "waxed": "fixfoot:waxed_oxidized_copper_basin"
+    }
+  }
+}
