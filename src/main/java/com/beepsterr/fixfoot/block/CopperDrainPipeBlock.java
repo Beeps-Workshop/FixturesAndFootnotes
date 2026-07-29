@@ -1,7 +1,6 @@
 package com.beepsterr.fixfoot.block;
 
 import com.mojang.serialization.MapCodec;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
@@ -75,17 +74,7 @@ public class CopperDrainPipeBlock extends Block {
         if (!state.getValue(CONNECTED)) {
             return COLUMN;
         }
-        VoxelShape collar = COLLAR;
-        for (Direction facing = Direction.NORTH; facing != state.getValue(FACING); facing = facing.getClockWise()) {
-            collar = rotateClockwise(collar);
-        }
-        return Shapes.or(COLUMN, collar);
-    }
-
-    private static VoxelShape rotateClockwise(VoxelShape shape) {
-        List<VoxelShape> boxes = new ArrayList<>();
-        shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> boxes.add(Shapes.box(1.0 - z2, y1, x1, 1.0 - z1, y2, x2)));
-        return boxes.stream().reduce(Shapes::or).orElse(Shapes.empty());
+        return Shapes.or(COLUMN, Facings.turn(COLLAR, state.getValue(FACING)));
     }
 
     @Override

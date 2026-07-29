@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "fixfoot:block/exposed_copper_drain"
+    },
+    "facing=east": {
+      "model": "fixfoot:block/exposed_copper_drain",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=south": {
+      "model": "fixfoot:block/exposed_copper_drain",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west": {
+      "model": "fixfoot:block/exposed_copper_drain",
+      "y": 270,
+      "uvlock": true
+    }
+  }
+}

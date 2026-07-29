@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "waxed_copper_drain",
+  "ingredients": [
+    {
+      "item": "fixfoot:weathered_copper_drain"
+    },
+    {
+      "item": "minecraft:honeycomb"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "fixfoot:waxed_weathered_copper_drain"
+  }
+}

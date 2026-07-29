@@ -110,5 +110,13 @@
   "block.fixfoot.weathered_copper_drain_pipe": "Weathered Copper Drain Pipe",
   "block.fixfoot.waxed_weathered_copper_drain_pipe": "Waxed Weathered Copper Drain Pipe",
   "block.fixfoot.oxidized_copper_drain_pipe": "Oxidized Copper Drain Pipe",
-  "block.fixfoot.waxed_oxidized_copper_drain_pipe": "Waxed Oxidized Copper Drain Pipe"
+  "block.fixfoot.waxed_oxidized_copper_drain_pipe": "Waxed Oxidized Copper Drain Pipe",
+  "block.fixfoot.copper_drain": "Copper Drain",
+  "block.fixfoot.waxed_copper_drain": "Waxed Copper Drain",
+  "block.fixfoot.exposed_copper_drain": "Exposed Copper Drain",
+  "block.fixfoot.waxed_exposed_copper_drain": "Waxed Exposed Copper Drain",
+  "block.fixfoot.weathered_copper_drain": "Weathered Copper Drain",
+  "block.fixfoot.waxed_weathered_copper_drain": "Waxed Weathered Copper Drain",
+  "block.fixfoot.oxidized_copper_drain": "Oxidized Copper Drain",
+  "block.fixfoot.waxed_oxidized_copper_drain": "Waxed Oxidized Copper Drain"
 }

@@ -1,0 +1,7 @@
+{
+  "parent": "fixfoot:block/drain_base",
+  "textures": {
+    "body": "minecraft:block/copper_block",
+    "inside": "minecraft:block/black_concrete"
+  }
+}

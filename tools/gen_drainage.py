@@ -31,7 +31,11 @@ MODID = "fixfoot"
 ADVANCEMENTS = "decorations"
 
 # Blockbench texture slot -> the name the per-stage models bind. Both pieces use a single slot.
-SLOTS = {"0": "body"}
+SLOTS = {"0": "body", "2": "inside"}
+
+# The dark mouth of the drain. Not per stage — the inside of a pipe is a hole, and a hole does not
+# oxidise — so every stage binds the same texture.
+INTERIOR = "minecraft:block/black_concrete"
 
 # prefix, display name, texture — freshest first, matching ModBlocks.COPPER_STAGES.
 STAGES = [
@@ -50,6 +54,9 @@ GUTTER_PARTS = {
     "_tight": "Drainage/CopperGutterCornerTight",
     "_wide": "Drainage/CopperGutterCornerWide",
     "_tight_mirrored": "Drainage/CopperGutterCornerTightM",
+}
+DRAIN_PARTS = {
+    "": "Drainage/CopperDrainageBottomPiece",
 }
 PIPE_PARTS = {
     "": "Drainage/CopperDrainagePipe",
@@ -102,6 +109,12 @@ def pipe_blockstate(stage_id):
     for facing, base in TURNS.items():
         variants[f"connected=true,facing={facing}"] = apply(f"{MODID}:block/{stage_id}_connected", base)
     return {"variants": variants}
+
+
+def drain_blockstate(stage_id):
+    """One model, turned to whichever way the mouth was pointed."""
+    return {"variants": {f"facing={facing}": apply(f"{MODID}:block/{stage_id}", turn)
+                         for facing, turn in TURNS.items()}}
 
 
 def block_loot(item):
@@ -158,20 +171,29 @@ def main():
     families = [
         ("gutter", "Gutter", GUTTER_PARTS, gutter_blockstate),
         ("drain_pipe", "Drain Pipe", PIPE_PARTS, pipe_blockstate),
+        ("drain", "Drain", DRAIN_PARTS, drain_blockstate),
     ]
 
     lang = {}
     ids = []
     for family, noun, parts, blockstate in families:
-        # Shared geometry, one base per authored piece.
+        # Shared geometry, one base per authored piece. Which slots a piece actually uses varies
+        # (only the drain has an interior), so each records its own for the per-stage models.
+        used = {}
         for part_suffix, source in parts.items():
-            write(f"{ASSETS}/models/block/{family}_base{part_suffix}.json", authored.load(source, SLOTS))
+            base = authored.load(source, SLOTS)
+            used[part_suffix] = {face["texture"].lstrip("#")
+                                 for element in base["elements"] for face in element["faces"].values()}
+            write(f"{ASSETS}/models/block/{family}_base{part_suffix}.json", base)
 
         for prefix, disp, texture in STAGES:
             stage_id = name(prefix, False, family)
             for part_suffix in parts:
+                textures = {"body": texture}
+                if "inside" in used[part_suffix]:
+                    textures["inside"] = INTERIOR
                 write(f"{ASSETS}/models/block/{stage_id}{part_suffix}.json",
-                      {"parent": f"{MODID}:block/{family}_base{part_suffix}", "textures": {"body": texture}})
+                      {"parent": f"{MODID}:block/{family}_base{part_suffix}", "textures": textures})
 
             for waxed in (False, True):
                 block_id = name(prefix, waxed, family)
@@ -188,6 +210,13 @@ def main():
         "pattern": ["C C", "CCC"],
         "key": {"C": {"item": "minecraft:copper_ingot"}},
         "result": {"count": 6, "id": f"{MODID}:copper_gutter"},
+    }, "minecraft:copper_ingot")
+    recipe("copper_drain", {
+        "type": "minecraft:crafting_shaped",
+        "category": "misc",
+        "pattern": ["C C", "CC "],
+        "key": {"C": {"item": "minecraft:copper_ingot"}},
+        "result": {"count": 1, "id": f"{MODID}:copper_drain"},
     }, "minecraft:copper_ingot")
     recipe("copper_drain_pipe", {
         "type": "minecraft:crafting_shaped",

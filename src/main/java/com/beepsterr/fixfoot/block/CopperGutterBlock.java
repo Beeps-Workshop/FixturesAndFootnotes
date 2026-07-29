@@ -1,7 +1,6 @@
 package com.beepsterr.fixfoot.block;
 
 import com.mojang.serialization.MapCodec;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
@@ -107,18 +106,7 @@ public class CopperGutterBlock extends Block {
             case INNER -> CORNER;
             case WIDE -> WRAP;
         };
-        // Authored facing north; turn it to match.
-        for (Direction facing = Direction.NORTH; facing != state.getValue(FACING); facing = facing.getClockWise()) {
-            shape = rotateClockwise(shape);
-        }
-        return shape;
-    }
-
-    /** Turns a shape a quarter turn about the block's vertical centre line. */
-    private static VoxelShape rotateClockwise(VoxelShape shape) {
-        List<VoxelShape> boxes = new ArrayList<>();
-        shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> boxes.add(Shapes.box(1.0 - z2, y1, x1, 1.0 - z1, y2, x2)));
-        return boxes.stream().reduce(Shapes::or).orElse(Shapes.empty());
+        return Facings.turn(shape, state.getValue(FACING));
     }
 
     @Override
@@ -208,21 +196,12 @@ public class CopperGutterBlock extends Block {
 
     private static boolean joins(GutterShape shape, Direction facing, BlockGetter level, BlockPos pos) {
         for (Link link : LINKS.get(shape)) {
-            Direction side = turn(link.side(), facing);
-            if (!linksBack(level, pos.relative(side), side.getOpposite(), turn(link.backsOnto(), facing))) {
+            Direction side = Facings.turn(link.side(), facing);
+            if (!linksBack(level, pos.relative(side), side.getOpposite(), Facings.turn(link.backsOnto(), facing))) {
                 return false;
             }
         }
         return true;
-    }
-
-    /** Takes a direction from the authored north-facing frame into a block facing {@code facing}. */
-    private static Direction turn(Direction base, Direction facing) {
-        Direction turned = base;
-        for (Direction from = Direction.NORTH; from != facing; from = from.getClockWise()) {
-            turned = turned.getClockWise();
-        }
-        return turned;
     }
 
     /**
@@ -237,7 +216,7 @@ public class CopperGutterBlock extends Block {
             return false;
         }
         for (Link link : LINKS.get(state.getValue(SHAPE))) {
-            if (turn(link.side(), facing) == toUs) {
+            if (Facings.turn(link.side(), facing) == toUs) {
                 return true;
             }
         }

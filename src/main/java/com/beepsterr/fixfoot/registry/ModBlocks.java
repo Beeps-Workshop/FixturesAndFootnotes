@@ -2,12 +2,14 @@ package com.beepsterr.fixfoot.registry;
 
 import com.beepsterr.fixfoot.Fixfoot;
 import com.beepsterr.fixfoot.block.CopperBasinBlock;
+import com.beepsterr.fixfoot.block.CopperDrainBlock;
 import com.beepsterr.fixfoot.block.CopperDrainPipeBlock;
 import com.beepsterr.fixfoot.block.CopperGutterBlock;
 import com.beepsterr.fixfoot.block.SlatPanelBlock;
 import com.beepsterr.fixfoot.block.SheetmetalBlock;
 import com.beepsterr.fixfoot.block.SlatScreenBlock;
 import com.beepsterr.fixfoot.block.WeatheringCopperBasinBlock;
+import com.beepsterr.fixfoot.block.WeatheringCopperDrainBlock;
 import com.beepsterr.fixfoot.block.WeatheringCopperDrainPipeBlock;
 import com.beepsterr.fixfoot.block.WeatheringCopperGutterBlock;
 import com.beepsterr.fixfoot.content.SlatVariants;
@@ -50,7 +52,7 @@ public final class ModBlocks {
             WeatheringCopper.WeatherState.OXIDIZED);
 
     /** The copper things that weather, by the tail of their id — used to walk every family. */
-    public static final List<String> COPPER_FAMILIES = List.of("basin", "gutter", "drain_pipe");
+    public static final List<String> COPPER_FAMILIES = List.of("basin", "gutter", "drain_pipe", "drain");
 
     /** e.g. {@code (WEATHERED, true, "basin")} -> {@code waxed_weathered_copper_basin}. */
     public static String copperName(WeatheringCopper.WeatherState stage, boolean waxed, String family) {
@@ -69,6 +71,7 @@ public final class ModBlocks {
         copperFamily("basin", WeatheringCopperBasinBlock::new, CopperBasinBlock::new);
         copperFamily("gutter", WeatheringCopperGutterBlock::new, CopperGutterBlock::new);
         copperFamily("drain_pipe", WeatheringCopperDrainPipeBlock::new, CopperDrainPipeBlock::new);
+        copperFamily("drain", WeatheringCopperDrainBlock::new, CopperDrainBlock::new);
     }
 
     /**

@@ -36,6 +36,18 @@
     },
     "fixfoot:oxidized_copper_drain_pipe": {
       "waxed": "fixfoot:waxed_oxidized_copper_drain_pipe"
+    },
+    "fixfoot:copper_drain": {
+      "waxed": "fixfoot:waxed_copper_drain"
+    },
+    "fixfoot:exposed_copper_drain": {
+      "waxed": "fixfoot:waxed_exposed_copper_drain"
+    },
+    "fixfoot:weathered_copper_drain": {
+      "waxed": "fixfoot:waxed_weathered_copper_drain"
+    },
+    "fixfoot:oxidized_copper_drain": {
+      "waxed": "fixfoot:waxed_oxidized_copper_drain"
     }
   }
 }

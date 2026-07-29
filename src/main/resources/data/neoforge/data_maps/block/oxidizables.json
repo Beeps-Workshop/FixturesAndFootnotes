@@ -27,6 +27,15 @@
     },
     "fixfoot:weathered_copper_drain_pipe": {
       "next_oxidation_stage": "fixfoot:oxidized_copper_drain_pipe"
+    },
+    "fixfoot:copper_drain": {
+      "next_oxidation_stage": "fixfoot:exposed_copper_drain"
+    },
+    "fixfoot:exposed_copper_drain": {
+      "next_oxidation_stage": "fixfoot:weathered_copper_drain"
+    },
+    "fixfoot:weathered_copper_drain": {
+      "next_oxidation_stage": "fixfoot:oxidized_copper_drain"
     }
   }
 }
