@@ -62,6 +62,14 @@ public class CopperDrainBlock extends Block {
 
     /** Ticks between drops while flowing. Every tick, so the stream is continuous rather than pulsed. */
     private static final int FLOW_INTERVAL = 1;
+    /**
+     * How often an idle drain looks up to see whether its run has started catching anything, and
+     * how much that is jittered either way so a roofline full of drains does not all wake on the
+     * same tick. A scheduled tick rather than a random one: random ticks average over a minute
+     * apart, vary wildly, and only fire near a player, which is no way to notice weather.
+     */
+    private static final int IDLE_INTERVAL = 40;
+    private static final int IDLE_JITTER = 12;
     /** Drops per burst. One a tick reads as a stream without a packet storm behind it. */
     private static final int DROPS_PER_BURST = 1;
     /**
@@ -130,15 +138,30 @@ public class CopperDrainBlock extends Block {
         settle(state, level, pos);
     }
 
-    /** Poked by a gutter upstream changing, so the mouth answers the weather rather than a poll. */
     @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         settle(state, level, pos);
     }
 
+    /** Arms the heartbeat when placed, and after a load where the scheduled tick did not survive. */
+    @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+        beat(level, pos, state);
+    }
+
+    private static void beat(Level level, BlockPos pos, BlockState state) {
+        if (!level.getBlockTicks().hasScheduledTick(pos, state.getBlock())) {
+            level.scheduleTick(pos, state.getBlock(),
+                    IDLE_INTERVAL + level.getRandom().nextInt(-IDLE_JITTER, IDLE_JITTER + 1));
+        }
+    }
+
     private static void settle(BlockState state, ServerLevel level, BlockPos pos) {
         Flow flow = state.getValue(FLOW);
-        Flow next = CopperDrainPipeBlock.fedRun(level, pos.above()) ? Flow.FLOWING : flow == Flow.FLOWING ? Flow.DRIPPING : Flow.EMPTY;
+        // Cheap global first: when it is not raining anywhere, no drain walks a single block.
+        boolean fed = level.isRaining() && CopperDrainPipeBlock.fedRun(level, pos.above());
+        Flow next = fed ? Flow.FLOWING : flow == Flow.FLOWING ? Flow.DRIPPING : Flow.EMPTY;
         if (next != flow) {
             level.setBlock(pos, state.setValue(FLOW, next), Block.UPDATE_CLIENTS);
         }
@@ -152,6 +175,8 @@ public class CopperDrainBlock extends Block {
             if (!level.getBlockTicks().hasScheduledTick(pos, state.getBlock())) {
                 level.scheduleTick(pos, state.getBlock(), FLOW_INTERVAL);
             }
+        } else {
+            beat(level, pos, state);
         }
     }
 

@@ -107,7 +107,7 @@ def apply(model, y):
 
 def gutter_blockstate(stage_id):
     """
-    Sixteen variants over four models, one per shape and facing. There are no mirrored corners to
+    Twenty variants over five models, one per shape and facing. There are no mirrored corners to
     author: a corner's handedness lives in the facing the block derives for itself, so the mirror
     of any corner is the same model under a different facing.
     """
@@ -115,11 +115,7 @@ def gutter_blockstate(stage_id):
     for facing, turn in TURNS.items():
         for shape, part in (("straight", ""), ("inner", "_inner"), ("tight", "_tight"),
                             ("wide", "_wide"), ("tight_mirrored", "_tight_mirrored")):
-            model = apply(f"{MODID}:block/{stage_id}{part}", turn)
-            # Both fill states point at the dry model until the channel surfaces are authored;
-            # the state is live either way, so a run can be watched filling in F3 meanwhile.
-            for filled in ("false", "true"):
-                variants[f"facing={facing},shape={shape},filled={filled}"] = model
+            variants[f"facing={facing},shape={shape}"] = apply(f"{MODID}:block/{stage_id}{part}", turn)
     return {"variants": variants}
 
 

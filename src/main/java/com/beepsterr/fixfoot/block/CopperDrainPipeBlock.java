@@ -83,10 +83,10 @@ public class CopperDrainPipeBlock extends Block {
     }
 
     /**
-     * Whether the gutter at the head of this run is carrying water. Walks up through the pipes to
-     * whichever one wears the collar, then asks the gutter it points at.
+     * Whether this run is catching anything. Walks up through the pipes to whichever one wears the
+     * collar, then asks the gutter it points at about its whole run.
      */
-    static boolean fedRun(LevelReader level, BlockPos pipe) {
+    static boolean fedRun(Level level, BlockPos pipe) {
         BlockPos cursor = pipe;
         for (int i = 0; i < MAX_RUN; i++) {
             BlockState state = level.getBlockState(cursor);
@@ -94,35 +94,13 @@ public class CopperDrainPipeBlock extends Block {
                 return false;
             }
             if (state.getValue(CONNECTED)) {
-                BlockState gutter = level.getBlockState(cursor.above().relative(state.getValue(FACING)));
-                return CopperGutterBlock.isGutter(gutter) && gutter.getValue(CopperGutterBlock.FILLED);
+                BlockPos gutterPos = cursor.above().relative(state.getValue(FACING));
+                return CopperGutterBlock.isGutter(level.getBlockState(gutterPos))
+                        && CopperGutterBlock.runCatchesRain(level, gutterPos);
             }
             cursor = cursor.above();
         }
         return false;
-    }
-
-    /**
-     * Wakes the drain at the foot of every run hanging off the gutter at {@code pos}.
-     *
-     * <p>Pushed from the gutter rather than polled: a drain left to its own random tick would only
-     * look about once a minute, and only count if it happened to land while the gutter upstream was
-     * still wet, so a shower could come and go without the mouth ever running. The pipes in between
-     * are only the path walked — they hold no state of their own, since the drain reads the gutter.
-     */
-    static void refreshRunsBelow(ServerLevel level, BlockPos gutter) {
-        for (Direction direction : Direction.Plane.HORIZONTAL) {
-            BlockPos cursor = gutter.below().relative(direction);
-            for (int i = 0; i < MAX_RUN
-                    && level.getBlockState(cursor).getBlock() instanceof CopperDrainPipeBlock; i++) {
-                cursor = cursor.below();
-                BlockState below = level.getBlockState(cursor);
-                if (below.getBlock() instanceof CopperDrainBlock) {
-                    level.scheduleTick(cursor, below.getBlock(), 1);
-                    break;
-                }
-            }
-        }
     }
 
     private static VoxelShape calculateShape(BlockState state) {
