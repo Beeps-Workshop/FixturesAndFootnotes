@@ -1,9 +1,11 @@
 name: Tests
 
 # Compile check on every push and PR, so breakage surfaces before release day rather than during it.
-# There's no unit suite here, so this is a build: it compiles both loaders for the one Minecraft
-# version that currently works — a bare `gradlew build` would also build the 1.21.4 Stonecutter
-# node, which doesn't (see RELEASE.md).
+# There's no unit suite here, so this is a build: every Minecraft version times every loader.
+#
+# The versions are discovered from versions/, not listed here, so adding a Stonecutter node is one
+# directory and CI follows. A bare `gradlew build` would cover them all in one go, but a matrix
+# fails per version rather than as one opaque run, and says which one broke in the job name.
 #
 # Named test.yml to match the workshop convention: test.yml runs on push/PR, build_* only on
 # release, dispatch or schedule.
@@ -18,8 +20,24 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  versions:
     runs-on: ubuntu-latest
+    outputs:
+      list: ${{ steps.v.outputs.list }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        run: echo "list=$(ls versions | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: versions
+    runs-on: ubuntu-latest
+    strategy:
+      # Keep going, so one broken version still reports on the others.
+      fail-fast: false
+      matrix:
+        mc: ${{ fromJSON(needs.versions.outputs.list) }}
+    name: build (${{ matrix.mc }})
     steps:
       - uses: actions/checkout@v4
 
@@ -32,13 +50,12 @@ jobs:
       - name: Build both loaders
         run: |
           chmod +x ./gradlew
-          ./gradlew :fabric:1.21.1:build :neoforge:1.21.1:build
+          ./gradlew ":fabric:${{ matrix.mc }}:build" ":neoforge:${{ matrix.mc }}:build"
 
-      - name: Upload jars
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: fixfoot-dev-${{ github.sha }}
+          name: fixfoot-dev-${{ matrix.mc }}-${{ github.sha }}
           path: |
-            fabric/versions/1.21.1/build/libs/fixfoot-fabric-*+1.21.1.jar
-            neoforge/versions/1.21.1/build/libs/fixfoot-neoforge-*+1.21.1.jar
+            fabric/versions/${{ matrix.mc }}/build/libs/fixfoot-fabric-*+${{ matrix.mc }}.jar
+            neoforge/versions/${{ matrix.mc }}/build/libs/fixfoot-neoforge-*+${{ matrix.mc }}.jar
           retention-days: 14

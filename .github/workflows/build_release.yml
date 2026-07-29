@@ -10,9 +10,12 @@ name: Release build
 #   1. The version property is `mod.version` (dotted), read via findProperty. `-Pmod_version=` — what
 #      the shared build.yml passes — is accepted silently and changes nothing, so the run goes green
 #      and ships jars still stamped with the old version. Worst kind of failure; hence the assert.
-#   2. A bare `gradlew build` also builds the 1.21.4 Stonecutter node, which doesn't compile yet.
-#      Only the per-version tasks are safe.
+#   2. There are now four jars, not one: every Minecraft version times every loader.
 #   3. Each libs/ also holds -sources and -dev-shadow jars that must never be uploaded.
+#
+# The Minecraft versions are discovered from versions/, not listed here, so adding a Stonecutter
+# node is one directory and CI follows. Each node declares what it actually supports in its own
+# mod.mc_targets, which is what gets published — 1.21.1 covers 1.21 too, 1.21.4 covers 1.21.2-4.
 #
 # .github/workflows/build_release.yml
 on:
@@ -24,9 +27,6 @@ on:
         description: 'Tag to build (e.g. v1.0.0)'
         required: true
 
-env:
-  MC: '1.21.1'
-
 # Publishing is driven by two repository variables, MODRINTH_ID and CURSEFORGE_ID (Settings ->
 # Secrets and variables -> Actions -> Variables). Neither project exists yet, so while they're
 # unset the publish job is skipped and the GitHub Release half still works from the first tag.
@@ -37,15 +37,26 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.v.outputs.version }}
+      versions: ${{ steps.v.outputs.versions }}
     steps:
+      - uses: actions/checkout@v4
+
       - id: v
         run: |
           RAW="${{ github.event.release.tag_name || github.event.inputs.tag }}"
           echo "version=${RAW#v}" >> "$GITHUB_OUTPUT"
+          # Every Stonecutter node, as a JSON array for the matrices below.
+          echo "versions=$(ls versions | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
 
   build:
     needs: prepare
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mc: ${{ fromJSON(needs.prepare.outputs.versions) }}
+    env:
+      MC: ${{ matrix.mc }}
+      VERSION: ${{ needs.prepare.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -56,15 +67,11 @@ jobs:
           cache: gradle
 
       - name: Build both loaders
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           chmod +x ./gradlew
           ./gradlew ":fabric:${MC}:build" ":neoforge:${MC}:build" -Pmod.version="${VERSION}"
 
       - name: Collect jars
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           mkdir -p out
           for LOADER in fabric neoforge; do
@@ -78,8 +85,6 @@ jobs:
       - name: Assert the jars are stamped with the release version
         # -Pmod.version silently no-ops if the property name ever drifts, which would publish jars
         # named for the new version but built as the old one. Check the metadata, not the filename.
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           # Metadata carries the bare mod.version; only the filename gets the +<mc> suffix.
           unzip -p "out/fixfoot-fabric-${VERSION}+${MC}.jar" fabric.mod.json > /tmp/fabric.mod.json
@@ -91,7 +96,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: fixfoot-${{ needs.prepare.outputs.version }}
+          name: fixfoot-${{ needs.prepare.outputs.version }}-${{ matrix.mc }}
           path: out/*.jar
           retention-days: 180
 
@@ -99,12 +104,14 @@ jobs:
     needs: [prepare, build]
     runs-on: ubuntu-latest
     permissions:
-      contents: write # attach both jars to the GitHub Release
+      contents: write # attach every jar to the GitHub Release
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: fixfoot-${{ needs.prepare.outputs.version }}
+          # One artifact per Minecraft version, flattened back into a single directory.
+          pattern: fixfoot-${{ needs.prepare.outputs.version }}-*
           path: out
+          merge-multiple: true
 
       - name: Attach to GitHub Release
         if: ${{ github.event_name == 'release' }}
@@ -119,15 +126,31 @@ jobs:
     if: ${{ vars.MODRINTH_ID != '' || vars.CURSEFORGE_ID != '' }}
     runs-on: ubuntu-latest
     strategy:
-      # One platform version per loader rather than one version carrying both jars, so nobody
-      # downloads the wrong file. Modrinth requires unique version numbers, hence the suffix.
+      # One platform version per loader per Minecraft version, rather than one version carrying
+      # several jars, so nobody downloads the wrong file. Modrinth requires unique version numbers,
+      # hence the suffix carrying both.
       matrix:
         loader: [fabric, neoforge]
+        mc: ${{ fromJSON(needs.prepare.outputs.versions) }}
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
-          name: fixfoot-${{ needs.prepare.outputs.version }}
+          name: fixfoot-${{ needs.prepare.outputs.version }}-${{ matrix.mc }}
           path: out
+
+      - id: targets
+        # What this node actually supports, straight from the node itself rather than repeated here.
+        run: |
+          LINE=$(grep '^mod.mc_targets=' "versions/${{ matrix.mc }}/gradle.properties" | cut -d= -f2-)
+          test -n "$LINE" || { echo "::error::no mod.mc_targets for ${{ matrix.mc }}"; exit 1; }
+          echo "Publishing ${{ matrix.mc }} for: $LINE"
+          {
+            echo 'game<<EOF'
+            echo "$LINE" | tr ' ' '\n'
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
 
       - uses: Kira-NT/mc-publish@52307b03863581dec6b652b83e597aec02ebb075 # v3.3.1
         with:
@@ -135,14 +158,11 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           curseforge-id: ${{ vars.CURSEFORGE_ID }}
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          version: ${{ needs.prepare.outputs.version }}+${{ matrix.loader }}
+          version: ${{ needs.prepare.outputs.version }}+${{ matrix.mc }}-${{ matrix.loader }}
           version-type: release
           loaders: ${{ matrix.loader }}
-          # The 1.21.1 branch targets both, per mod.mc_targets in versions/1.21.1/gradle.properties.
-          game-versions: |
-            1.21
-            1.21.1
-          files: out/fixfoot-${{ matrix.loader }}-${{ needs.prepare.outputs.version }}+${{ env.MC }}.jar
+          game-versions: ${{ steps.targets.outputs.game }}
+          files: out/fixfoot-${{ matrix.loader }}-${{ needs.prepare.outputs.version }}+${{ matrix.mc }}.jar
           # Architectury is a required runtime dependency, not shaded in — without this declared,
           # every user installs the mod and it refuses to start. Declaring it lets launchers pull it
           # in automatically. Resolved by slug; pin as architectury-api(required){modrinth:ID} if a
