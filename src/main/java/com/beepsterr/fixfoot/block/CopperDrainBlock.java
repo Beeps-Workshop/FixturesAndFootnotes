@@ -70,6 +70,14 @@ public class CopperDrainBlock extends Block {
      */
     private static final int IDLE_INTERVAL = 40;
     private static final int IDLE_JITTER = 12;
+    /**
+     * How long the mouth keeps dripping once its run stops feeding it — a minute and a half either
+     * side of a spread, so a shower takes a while to finish draining rather than stopping with it.
+     * One scheduled tick covers the whole tail: the particles are drawn from the blockstate, so
+     * nothing needs ticking in between.
+     */
+    private static final int DRIP_TAIL = 1600;
+    private static final int DRIP_JITTER = 400;
     /** Drops per burst. One a tick reads as a stream without a packet storm behind it. */
     private static final int DROPS_PER_BURST = 1;
     /**
@@ -133,9 +141,14 @@ public class CopperDrainBlock extends Block {
      * rather than straight to empty, so a run tails off over a few ticks the way a real one would
      * instead of shutting off the moment the rain stops.
      */
+    /**
+     * Only a safety net, and deliberately not a second driver: it arms the heartbeat for drains
+     * placed before there was one, or any that lost their scheduled tick. Running the full check
+     * here would also cut the drip tail short, since a random tick lands in the middle of it.
+     */
     @Override
     protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        settle(state, level, pos);
+        beat(level, pos, state);
     }
 
     @Override
@@ -143,11 +156,21 @@ public class CopperDrainBlock extends Block {
         settle(state, level, pos);
     }
 
-    /** Arms the heartbeat when placed, and after a load where the scheduled tick did not survive. */
+    /**
+     * Arms the heartbeat on a genuinely new drain.
+     *
+     * <p>The check that it is new matters more than it looks: onPlace fires on every state change,
+     * so without it the drain re-arms itself the instant it writes its own flow state — and since
+     * scheduled ticks are keyed on position and block with the time ignored, that heartbeat wins
+     * and the longer tick the caller goes on to schedule is dropped on the floor. The drip tail
+     * lasted two seconds instead of ninety for exactly that reason.
+     */
     @Override
     protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
         super.onPlace(state, level, pos, oldState, movedByPiston);
-        beat(level, pos, state);
+        if (!oldState.is(this)) {
+            beat(level, pos, state);
+        }
     }
 
     private static void beat(Level level, BlockPos pos, BlockState state) {
@@ -162,21 +185,27 @@ public class CopperDrainBlock extends Block {
         // Cheap global first: when it is not raining anywhere, no drain walks a single block.
         boolean fed = level.isRaining() && CopperDrainPipeBlock.fedRun(level, pos.above());
         Flow next = fed ? Flow.FLOWING : flow == Flow.FLOWING ? Flow.DRIPPING : Flow.EMPTY;
+        switch (next) {
+            case FLOWING -> {
+                spout(level, pos, state.getValue(FACING));
+                if (level.random.nextInt(FILL_INTERVAL) == 0) {
+                    pour(level, pos, state.getValue(FACING));
+                }
+                if (!level.getBlockTicks().hasScheduledTick(pos, state.getBlock())) {
+                    level.scheduleTick(pos, state.getBlock(), FLOW_INTERVAL);
+                }
+            }
+            // Dripping is entered once and lasts until this tick comes back round, which is what
+            // gives the tail its length; the next pass finds it still unfed and falls to empty.
+            case DRIPPING -> level.scheduleTick(pos, state.getBlock(),
+                    DRIP_TAIL + level.random.nextInt(-DRIP_JITTER, DRIP_JITTER + 1));
+            case EMPTY -> beat(level, pos, state);
+        }
+
+        // Written last: setting the state fires onPlace, and anything that schedules from there
+        // would take precedence over the tick just booked above.
         if (next != flow) {
             level.setBlock(pos, state.setValue(FLOW, next), Block.UPDATE_CLIENTS);
-        }
-        // Dripping is left to the random tick to stop, so a run tails off unevenly rather than
-        // on a timer. Flowing drives itself, since animateTick is far too sparse for a stream.
-        if (next == Flow.FLOWING) {
-            spout(level, pos, state.getValue(FACING));
-            if (level.random.nextInt(FILL_INTERVAL) == 0) {
-                pour(level, pos, state.getValue(FACING));
-            }
-            if (!level.getBlockTicks().hasScheduledTick(pos, state.getBlock())) {
-                level.scheduleTick(pos, state.getBlock(), FLOW_INTERVAL);
-            }
-        } else {
-            beat(level, pos, state);
         }
     }
 
