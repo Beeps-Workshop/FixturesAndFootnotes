@@ -1,61 +1,31 @@
 {
   "variants": {
-    "connected=false,facing=north,filled=false": {
+    "connected=false,facing=north": {
       "model": "fixfoot:block/exposed_copper_drain_pipe"
     },
-    "connected=true,facing=north,filled=false": {
+    "connected=true,facing=north": {
       "model": "fixfoot:block/exposed_copper_drain_pipe_connected"
     },
-    "connected=false,facing=north,filled=true": {
+    "connected=false,facing=east": {
       "model": "fixfoot:block/exposed_copper_drain_pipe"
     },
-    "connected=true,facing=north,filled=true": {
-      "model": "fixfoot:block/exposed_copper_drain_pipe_connected"
-    },
-    "connected=false,facing=east,filled=false": {
-      "model": "fixfoot:block/exposed_copper_drain_pipe"
-    },
-    "connected=true,facing=east,filled=false": {
+    "connected=true,facing=east": {
       "model": "fixfoot:block/exposed_copper_drain_pipe_connected",
       "y": 90,
       "uvlock": true
     },
-    "connected=false,facing=east,filled=true": {
+    "connected=false,facing=south": {
       "model": "fixfoot:block/exposed_copper_drain_pipe"
     },
-    "connected=true,facing=east,filled=true": {
-      "model": "fixfoot:block/exposed_copper_drain_pipe_connected",
-      "y": 90,
-      "uvlock": true
-    },
-    "connected=false,facing=south,filled=false": {
-      "model": "fixfoot:block/exposed_copper_drain_pipe"
-    },
-    "connected=true,facing=south,filled=false": {
+    "connected=true,facing=south": {
       "model": "fixfoot:block/exposed_copper_drain_pipe_connected",
       "y": 180,
       "uvlock": true
     },
-    "connected=false,facing=south,filled=true": {
+    "connected=false,facing=west": {
       "model": "fixfoot:block/exposed_copper_drain_pipe"
     },
-    "connected=true,facing=south,filled=true": {
-      "model": "fixfoot:block/exposed_copper_drain_pipe_connected",
-      "y": 180,
-      "uvlock": true
-    },
-    "connected=false,facing=west,filled=false": {
-      "model": "fixfoot:block/exposed_copper_drain_pipe"
-    },
-    "connected=true,facing=west,filled=false": {
-      "model": "fixfoot:block/exposed_copper_drain_pipe_connected",
-      "y": 270,
-      "uvlock": true
-    },
-    "connected=false,facing=west,filled=true": {
-      "model": "fixfoot:block/exposed_copper_drain_pipe"
-    },
-    "connected=true,facing=west,filled=true": {
+    "connected=true,facing=west": {
       "model": "fixfoot:block/exposed_copper_drain_pipe_connected",
       "y": 270,
       "uvlock": true

@@ -109,11 +109,8 @@ def pipe_blockstate(stage_id):
     """Plain column until a gutter sits above; then the collar, turned to face that gutter."""
     variants = {}
     for facing, base in TURNS.items():
-        for filled in ("false", "true"):
-            variants[f"connected=false,facing={facing},filled={filled}"] = \
-                apply(f"{MODID}:block/{stage_id}", 0)
-            variants[f"connected=true,facing={facing},filled={filled}"] = \
-                apply(f"{MODID}:block/{stage_id}_connected", base)
+        variants[f"connected=false,facing={facing}"] = apply(f"{MODID}:block/{stage_id}", 0)
+        variants[f"connected=true,facing={facing}"] = apply(f"{MODID}:block/{stage_id}_connected", base)
     return {"variants": variants}
 
 
