@@ -68,27 +68,31 @@ public final class ModBlocks {
     public static final Map<String, RegistrySupplier<Block>> SCREEN = new LinkedHashMap<>();
 
     static {
-        copperFamily("basin", WeatheringCopperBasinBlock::new, CopperBasinBlock::new);
-        copperFamily("gutter", WeatheringCopperGutterBlock::new, CopperGutterBlock::new);
-        copperFamily("drain_pipe", WeatheringCopperDrainPipeBlock::new, CopperDrainPipeBlock::new);
-        copperFamily("drain", WeatheringCopperDrainBlock::new, CopperDrainBlock::new);
+        copperFamily("basin", WeatheringCopperBasinBlock::new, CopperBasinBlock::new, false);
+        copperFamily("gutter", WeatheringCopperGutterBlock::new, CopperGutterBlock::new, true);
+        copperFamily("drain_pipe", WeatheringCopperDrainPipeBlock::new, CopperDrainPipeBlock::new, false);
+        copperFamily("drain", WeatheringCopperDrainBlock::new, CopperDrainBlock::new, true);
     }
 
     /**
      * Registers one family's eight blocks: the four ageing stages, then the waxed twins that never
-     * change. Waxed copies the vanilla waxed block's properties, so they don't idle on random ticks.
+     * change. Waxed copies the vanilla waxed block's properties, which carry no random tick — so
+     * families whose behaviour rides that tick, rather than only their ageing, ask for it back.
      */
     private static void copperFamily(
             String family,
             BiFunction<WeatheringCopper.WeatherState, BlockBehaviour.Properties, Block> ageing,
-            Function<BlockBehaviour.Properties, Block> waxed) {
+            Function<BlockBehaviour.Properties, Block> waxed,
+            boolean waxedStillTicks) {
         for (WeatheringCopper.WeatherState stage : COPPER_STAGES) {
             String id = copperName(stage, false, family);
             COPPER.put(id, BLOCKS.register(id, () -> ageing.apply(stage, copperProperties(Blocks.COPPER_BLOCK))));
         }
         for (WeatheringCopper.WeatherState stage : COPPER_STAGES) {
             String id = copperName(stage, true, family);
-            COPPER.put(id, BLOCKS.register(id, () -> waxed.apply(copperProperties(Blocks.WAXED_COPPER_BLOCK))));
+            BlockBehaviour.Properties properties = copperProperties(Blocks.WAXED_COPPER_BLOCK);
+            COPPER.put(id, BLOCKS.register(id,
+                    () -> waxed.apply(waxedStillTicks ? properties.randomTicks() : properties)));
         }
     }
 

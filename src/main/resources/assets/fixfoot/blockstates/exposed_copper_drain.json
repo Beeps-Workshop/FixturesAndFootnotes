@@ -1,19 +1,55 @@
 {
   "variants": {
-    "facing=north": {
+    "facing=north,flow=empty": {
       "model": "fixfoot:block/exposed_copper_drain"
     },
-    "facing=east": {
+    "facing=north,flow=flowing": {
+      "model": "fixfoot:block/exposed_copper_drain"
+    },
+    "facing=north,flow=dripping": {
+      "model": "fixfoot:block/exposed_copper_drain"
+    },
+    "facing=east,flow=empty": {
       "model": "fixfoot:block/exposed_copper_drain",
       "y": 90,
       "uvlock": true
     },
-    "facing=south": {
+    "facing=east,flow=flowing": {
+      "model": "fixfoot:block/exposed_copper_drain",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=east,flow=dripping": {
+      "model": "fixfoot:block/exposed_copper_drain",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=south,flow=empty": {
       "model": "fixfoot:block/exposed_copper_drain",
       "y": 180,
       "uvlock": true
     },
-    "facing=west": {
+    "facing=south,flow=flowing": {
+      "model": "fixfoot:block/exposed_copper_drain",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=south,flow=dripping": {
+      "model": "fixfoot:block/exposed_copper_drain",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west,flow=empty": {
+      "model": "fixfoot:block/exposed_copper_drain",
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=west,flow=flowing": {
+      "model": "fixfoot:block/exposed_copper_drain",
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=west,flow=dripping": {
       "model": "fixfoot:block/exposed_copper_drain",
       "y": 270,
       "uvlock": true

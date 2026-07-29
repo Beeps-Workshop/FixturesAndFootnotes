@@ -2,12 +2,18 @@ package com.beepsterr.fixfoot.neoforge;
 
 import com.beepsterr.fixfoot.Fixfoot;
 import com.beepsterr.fixfoot.client.FixfootClient;
+import java.util.function.Function;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.client.particle.SpriteSet;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
 @Mod(Fixfoot.MOD_ID)
 public final class FixfootNeoForge {
@@ -17,6 +23,14 @@ public final class FixfootNeoForge {
         // Client-only registration, each in its correct window (see FixfootClient). Guarded so the
         // client classes never load on a dedicated server.
         if (FMLEnvironment.dist == Dist.CLIENT) {
+            modBus.addListener((RegisterParticleProvidersEvent event) ->
+                    FixfootClient.initParticles(new FixfootClient.ParticleSink() {
+                        @Override
+                        public <T extends ParticleOptions> void register(
+                                ParticleType<T> type, Function<SpriteSet, ParticleProvider<T>> provider) {
+                            event.registerSpriteSet(type, provider::apply);
+                        }
+                    }));
             modBus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(FixfootClient::initClient));
             modBus.addListener((EntityRenderersEvent.RegisterRenderers event) ->
                     FixfootClient.initEntityRenderers(event::registerEntityRenderer));

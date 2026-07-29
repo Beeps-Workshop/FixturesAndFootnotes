@@ -97,24 +97,35 @@ def gutter_blockstate(stage_id):
     for facing, turn in TURNS.items():
         for shape, part in (("straight", ""), ("inner", "_inner"), ("tight", "_tight"),
                             ("wide", "_wide"), ("tight_mirrored", "_tight_mirrored")):
-            variants[f"facing={facing},shape={shape}"] = apply(f"{MODID}:block/{stage_id}{part}", turn)
+            model = apply(f"{MODID}:block/{stage_id}{part}", turn)
+            # Both fill states point at the dry model until the channel surfaces are authored;
+            # the state is live either way, so a run can be watched filling in F3 meanwhile.
+            for filled in ("false", "true"):
+                variants[f"facing={facing},shape={shape},filled={filled}"] = model
     return {"variants": variants}
 
 
 def pipe_blockstate(stage_id):
     """Plain column until a gutter sits above; then the collar, turned to face that gutter."""
     variants = {}
-    for facing in TURNS:
-        variants[f"connected=false,facing={facing}"] = apply(f"{MODID}:block/{stage_id}", 0)
     for facing, base in TURNS.items():
-        variants[f"connected=true,facing={facing}"] = apply(f"{MODID}:block/{stage_id}_connected", base)
+        for filled in ("false", "true"):
+            variants[f"connected=false,facing={facing},filled={filled}"] = \
+                apply(f"{MODID}:block/{stage_id}", 0)
+            variants[f"connected=true,facing={facing},filled={filled}"] = \
+                apply(f"{MODID}:block/{stage_id}_connected", base)
     return {"variants": variants}
 
 
 def drain_blockstate(stage_id):
-    """One model, turned to whichever way the mouth was pointed."""
-    return {"variants": {f"facing={facing}": apply(f"{MODID}:block/{stage_id}", turn)
-                         for facing, turn in TURNS.items()}}
+    """
+    One model, turned to whichever way the mouth was pointed. Every flow state shares it for now —
+    the water leaving the mouth is particles rather than geometry, so only a stream for `flowing`
+    is still missing.
+    """
+    return {"variants": {f"facing={facing},flow={flow}": apply(f"{MODID}:block/{stage_id}", turn)
+                         for facing, turn in TURNS.items()
+                         for flow in ("empty", "flowing", "dripping")}}
 
 
 def block_loot(item):

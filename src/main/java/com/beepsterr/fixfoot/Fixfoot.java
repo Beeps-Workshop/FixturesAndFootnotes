@@ -4,6 +4,7 @@ import com.beepsterr.fixfoot.registry.ModBlocks;
 import com.beepsterr.fixfoot.registry.ModCreativeTabs;
 import com.beepsterr.fixfoot.registry.ModEntities;
 import com.beepsterr.fixfoot.registry.ModItems;
+import com.beepsterr.fixfoot.registry.ModParticles;
 
 /**
  * Loader-agnostic entrypoint. Each loader's initializer calls {@link #init()}.
@@ -20,6 +21,7 @@ public final class Fixfoot {
         ModBlocks.register();
         ModItems.register();
         ModEntities.register();
+        ModParticles.register();
         ModCreativeTabs.register();
     }
 }

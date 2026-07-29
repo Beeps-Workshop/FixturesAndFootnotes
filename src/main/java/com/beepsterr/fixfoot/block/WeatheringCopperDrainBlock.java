@@ -39,13 +39,10 @@ public class WeatheringCopperDrainBlock extends CopperDrainBlock implements Weat
         return weatherState;
     }
 
+    /** Ages on top of the base block's flow handling, which every drain needs however old it is. */
     @Override
     protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        super.randomTick(state, level, pos, random);
         changeOverTime(state, level, pos, random);
-    }
-
-    @Override
-    protected boolean isRandomlyTicking(BlockState state) {
-        return WeatheringCopper.getNext(state.getBlock()).isPresent();
     }
 }

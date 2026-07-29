@@ -4,11 +4,18 @@ import com.beepsterr.fixfoot.client.render.StorageNetRenderer;
 import com.beepsterr.fixfoot.client.render.WidePlanterRenderer;
 import com.beepsterr.fixfoot.content.SlatVariants;
 import com.beepsterr.fixfoot.registry.ModBlocks;
+import com.beepsterr.fixfoot.client.particle.SpoutWaterParticle;
 import com.beepsterr.fixfoot.registry.ModEntities;
+import com.beepsterr.fixfoot.registry.ModParticles;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.architectury.registry.registries.RegistrySupplier;
+import java.util.function.Function;
 import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.client.particle.SpriteSet;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -26,6 +33,18 @@ import net.minecraft.world.level.block.Block;
  * hands in its own registrar and the list still lives here rather than being duplicated per loader.
  */
 public final class FixfootClient {
+    /** Bridges Fabric's ParticleFactoryRegistry and NeoForge's RegisterParticleProviders event. */
+    @FunctionalInterface
+    public interface ParticleSink {
+        /**
+         * Takes a plain {@link Function} rather than vanilla's own sprite-registration interface,
+         * which is private in the compiled class however the decompiled source reads — the same
+         * trap {@code DripParticle}'s constructor sets. Each loader adapts it to its own.
+         */
+        <T extends ParticleOptions> void register(ParticleType<T> type,
+                                                  Function<SpriteSet, ParticleProvider<T>> provider);
+    }
+
     /** Bridges Fabric's EntityRendererRegistry and NeoForge's RegisterRenderers event. */
     @FunctionalInterface
     public interface EntityRendererSink {
@@ -53,6 +72,18 @@ public final class FixfootClient {
         for (RegistrySupplier<Block> basin : ModBlocks.COPPER.values()) {
             ColorHandlerRegistry.registerBlockColors(water, basin.get());
         }
+    }
+
+    /**
+     * Particle providers.
+     *
+     * <p>Takes a sink for the same reason the entity renderers do: each loader has its own window
+     * for this, and Architectury's wrapper warns in its own docs that it misregisters on the Forge
+     * side unless it is called before client setup. Going direct is a few lines either way and
+     * leaves nothing to guess about.
+     */
+    public static void initParticles(ParticleSink sink) {
+        sink.register(ModParticles.SPOUT_WATER.get(), SpoutWaterParticle.Provider::new);
     }
 
     public static void initEntityRenderers(EntityRendererSink sink) {

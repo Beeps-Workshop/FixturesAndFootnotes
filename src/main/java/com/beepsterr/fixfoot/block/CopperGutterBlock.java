@@ -1,10 +1,13 @@
 package com.beepsterr.fixfoot.block;
 
 import com.mojang.serialization.MapCodec;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -16,6 +19,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -40,6 +44,11 @@ public class CopperGutterBlock extends Block {
     public static final MapCodec<? extends Block> CODEC = simpleCodec(CopperGutterBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<GutterShape> SHAPE = EnumProperty.create("shape", GutterShape.class);
+    /** Carrying water. Set by rain, spread along the run, cleared when the weather turns. */
+    public static final BooleanProperty FILLED = BooleanProperty.create("filled");
+
+    /** Ticks for the fill to travel one gutter, so a long run visibly runs rather than snapping. */
+    private static final int SPREAD_DELAY = 2;
 
     /**
      * Which authored piece this block is. Not vanilla's {@code StairsShape}: a stair is symmetric
@@ -81,7 +90,8 @@ public class CopperGutterBlock extends Block {
         super(properties);
         registerDefaultState(defaultBlockState()
                 .setValue(FACING, Direction.NORTH)
-                .setValue(SHAPE, GutterShape.STRAIGHT));
+                .setValue(SHAPE, GutterShape.STRAIGHT)
+                .setValue(FILLED, false));
         this.shapes = getShapeForEachState(CopperGutterBlock::calculateShape);
     }
 
@@ -92,7 +102,7 @@ public class CopperGutterBlock extends Block {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, SHAPE);
+        builder.add(FACING, SHAPE, FILLED);
     }
 
     @Override
@@ -221,6 +231,83 @@ public class CopperGutterBlock extends Block {
             }
         }
         return false;
+    }
+
+    @Override
+    protected boolean isRandomlyTicking(BlockState state) {
+        return true; // rain and drying both ride the random tick, waxed and fully aged alike
+    }
+
+    /**
+     * Fills from rain, and dries once the weather turns.
+     *
+     * <p>The two tests are deliberately different. Filling asks about this spot, since a gutter has
+     * to be out under the weather to catch anything. Drying asks only whether it is still raining
+     * anywhere, because the sheltered stretches of a run are filled by their neighbours rather than
+     * by the sky — asking them about their own spot would empty them mid-downpour.
+     */
+    @Override
+    protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (state.getValue(FILLED)) {
+            if (!level.isRaining()) {
+                level.setBlock(pos, state.setValue(FILLED, false), Block.UPDATE_CLIENTS);
+                CopperDrainPipeBlock.refreshRunsBelow(level, pos);
+            }
+        } else if (catchesRain(level, pos)) {
+            fill(level, pos, state);
+        }
+    }
+
+    /** Woken by a neighbour filling; the chain only carries on while that neighbour is still wet. */
+    @Override
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (state.getValue(FILLED)) {
+            return;
+        }
+        for (BlockPos linked : links(level, pos, state)) {
+            BlockState neighbour = level.getBlockState(linked);
+            if (isGutter(neighbour) && neighbour.getValue(FILLED)) {
+                fill(level, pos, state);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Whether rain is landing on this gutter. Asked one block up, because a gutter is the topmost
+     * solid block in its column and {@link ServerLevel#isRainingAt} reports false for that block
+     * itself. Anything under cover fills from its neighbours instead.
+     */
+    private static boolean catchesRain(ServerLevel level, BlockPos pos) {
+        return level.isRainingAt(pos.above());
+    }
+
+    /**
+     * Wets this gutter and nudges the ones it joins.
+     *
+     * <p>A chain of scheduled ticks rather than one sweep of the whole run: the work per tick stays
+     * bounded however long the run is, an already-filled gutter ends the chain so a loop cannot go
+     * round for ever, and a run reaching into unloaded chunks simply stops there and picks up again
+     * when they load.
+     */
+    private static void fill(ServerLevel level, BlockPos pos, BlockState state) {
+        level.setBlock(pos, state.setValue(FILLED, true), Block.UPDATE_CLIENTS);
+        CopperDrainPipeBlock.refreshRunsBelow(level, pos);
+        for (BlockPos linked : links(level, pos, state)) {
+            BlockState neighbour = level.getBlockState(linked);
+            if (isGutter(neighbour) && !neighbour.getValue(FILLED)) {
+                level.scheduleTick(linked, neighbour.getBlock(), SPREAD_DELAY);
+            }
+        }
+    }
+
+    /** The positions this gutter's shape joins — the same links the corner matching is built on. */
+    private static List<BlockPos> links(BlockGetter level, BlockPos pos, BlockState state) {
+        List<BlockPos> out = new ArrayList<>(2);
+        for (Link link : LINKS.get(state.getValue(SHAPE))) {
+            out.add(pos.relative(Facings.turn(link.side(), state.getValue(FACING))));
+        }
+        return out;
     }
 
     /** True for every ageing stage and their waxed twins, so runs corner across mismatched copper. */

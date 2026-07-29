@@ -125,6 +125,18 @@ public class CopperBasinBlock extends Block {
         return (FLOOR + WATER_PER_LEVEL * state.getValue(LEVEL)) / 16.0;
     }
 
+    /**
+     * Tips one layer in, if there is room. Returns true either way — a full basin still counts as
+     * something the water has landed in, so a spout above it does not keep looking further down.
+     */
+    static boolean catchWater(Level level, BlockPos pos, BlockState state) {
+        int fill = state.getValue(LEVEL);
+        if (fill < MAX_LEVEL) {
+            setLevel(state, level, pos, fill + 1);
+        }
+        return true;
+    }
+
     private static void setLevel(BlockState state, Level level, BlockPos pos, int fill) {
         BlockState result = state.setValue(LEVEL, fill);
         level.setBlockAndUpdate(pos, result);

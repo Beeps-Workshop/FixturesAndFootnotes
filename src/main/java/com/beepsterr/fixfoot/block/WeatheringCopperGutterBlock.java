@@ -39,13 +39,10 @@ public class WeatheringCopperGutterBlock extends CopperGutterBlock implements We
         return weatherState;
     }
 
+    /** Ages on top of the base block's rain handling, which every gutter needs however old it is. */
     @Override
     protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        super.randomTick(state, level, pos, random);
         changeOverTime(state, level, pos, random);
-    }
-
-    @Override
-    protected boolean isRandomlyTicking(BlockState state) {
-        return WeatheringCopper.getNext(state.getBlock()).isPresent();
     }
 }
