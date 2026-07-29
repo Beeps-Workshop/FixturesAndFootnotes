@@ -63,8 +63,26 @@ PIPE_PARTS = {
     "_connected": "Drainage/CopperDrainagePipeGutterConnection",
 }
 
+# Blocks cut from one copper block, by family. Copper is priced at 9 per block: the thin pieces you
+# need a lot of are near enough an ingot each, the drain is chunkier and costs about two.
+CUTS = {"gutter": 8, "drain_pipe": 8, "drain": 4}
+
 # The authored models face north; a facing is that many clockwise quarter turns from it.
 TURNS = {"north": 0, "east": 90, "south": 180, "west": 270}
+
+
+def source_block(prefix, waxed):
+    """The vanilla copper block of this stage, which is what the drainage pieces are cut from."""
+    base = "copper_block" if not prefix else prefix + "copper"
+    return "minecraft:" + ("waxed_" if waxed else "") + base
+
+
+def stonecut(base, result_item, count):
+    return {
+        "type": "minecraft:stonecutting",
+        "ingredient": {"item": base},
+        "result": {"count": count, "id": result_item},
+    }
 
 
 def name(prefix, waxed, family):
@@ -211,29 +229,17 @@ def main():
                 write(f"{DATA}/loot_table/blocks/{block_id}.json", block_loot(f"{MODID}:{block_id}"))
                 lang[f"block.fixfoot.{block_id}"] = display(disp, waxed, noun)
 
-    # Gutters come off the stonecutter like the rest of copper's shapes do; pipes are a short run.
-    recipe("copper_gutter", {
-        "type": "minecraft:crafting_shaped",
-        "category": "misc",
-        "pattern": ["C C", "CCC"],
-        "key": {"C": {"item": "minecraft:copper_ingot"}},
-        "result": {"count": 6, "id": f"{MODID}:copper_gutter"},
-    }, "minecraft:copper_ingot")
-    recipe("copper_drain", {
-        "type": "minecraft:crafting_shaped",
-        "category": "misc",
-        "pattern": ["C C", "CC "],
-        "key": {"C": {"item": "minecraft:copper_ingot"}},
-        "result": {"count": 1, "id": f"{MODID}:copper_drain"},
-    }, "minecraft:copper_ingot")
-    recipe("copper_drain_pipe", {
-        "type": "minecraft:crafting_shaped",
-        "category": "misc",
-        "pattern": ["C", "C", "C"],
-        "key": {"C": {"item": "minecraft:copper_ingot"}},
-        "result": {"count": 4, "id": f"{MODID}:copper_drain_pipe"},
-    }, "minecraft:copper_ingot")
+    # Cut from copper rather than crafted: it is how vanilla shapes every other copper block, and
+    # it keeps each ageing stage cutting into its own without a recipe book full of near-duplicates.
+    for family, *_ in families:
+        for prefix, *_rest in STAGES:
+            for waxed in (False, True):
+                block_id = name(prefix, waxed, family)
+                base = source_block(prefix, waxed)
+                recipe(f"{block_id}_from_{base.split(':')[1]}_stonecutting",
+                       stonecut(base, f"{MODID}:{block_id}", CUTS[family]), base)
 
+    # Waxing stays a crafting recipe, mirroring vanilla's shortcut alongside the honeycomb interaction.
     for family, *_ in families:
         for prefix, *_rest in STAGES:
             unwaxed, waxed_id = name(prefix, False, family), name(prefix, True, family)

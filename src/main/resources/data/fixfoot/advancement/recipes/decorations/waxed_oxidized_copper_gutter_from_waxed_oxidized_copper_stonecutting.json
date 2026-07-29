@@ -6,7 +6,7 @@
       "conditions": {
         "items": [
           {
-            "items": "minecraft:copper_ingot"
+            "items": "minecraft:waxed_oxidized_copper"
           }
         ]
       }
@@ -14,7 +14,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "fixfoot:copper_gutter"
+        "recipe": "fixfoot:waxed_oxidized_copper_gutter_from_waxed_oxidized_copper_stonecutting"
       }
     }
   },
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "fixfoot:copper_gutter"
+      "fixfoot:waxed_oxidized_copper_gutter_from_waxed_oxidized_copper_stonecutting"
     ]
   }
 }

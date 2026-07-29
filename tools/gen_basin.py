@@ -81,6 +81,12 @@ def suffix(level):
     return "" if level == 0 else f"_level{level}"
 
 
+def source_block(prefix, waxed):
+    """The vanilla copper block of this stage, which the basin is cut from."""
+    base = "copper_block" if not prefix else prefix + "copper"
+    return "minecraft:" + ("waxed_" if waxed else "") + base
+
+
 def block_loot(item):
     return {
         "type": "minecraft:block",
@@ -159,6 +165,18 @@ def main():
             write(f"{ASSETS}/models/item/{block_id}.json", {"parent": f"{MODID}:block/{stage_id}"})
             write(f"{DATA}/loot_table/blocks/{block_id}.json", block_loot(f"{MODID}:{block_id}"))
             lang[f"block.fixfoot.{block_id}"] = display(disp, waxed)
+
+    # Cut from copper like the drainage blocks, one basin to the block. The crafting recipe stays
+    # alongside it: the grid is the cheap route at five ingots, the stonecutter the convenient one.
+    for prefix, *_ in STAGES:
+        for waxed in (False, True):
+            block_id = name(prefix, waxed)
+            base = source_block(prefix, waxed)
+            recipe(f"{block_id}_from_{base.split(':')[1]}_stonecutting", {
+                "type": "minecraft:stonecutting",
+                "ingredient": {"item": base},
+                "result": {"count": 1, "id": f"{MODID}:{block_id}"},
+            }, base)
 
     # A basin is a cauldron two rows tall instead of three — five ingots rather than seven.
     recipe("copper_basin", {

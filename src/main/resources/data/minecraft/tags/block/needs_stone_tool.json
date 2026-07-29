@@ -1,14 +1,6 @@
 {
   "replace": false,
   "values": [
-    "fixfoot:copper_basin",
-    "fixfoot:waxed_copper_basin",
-    "fixfoot:exposed_copper_basin",
-    "fixfoot:waxed_exposed_copper_basin",
-    "fixfoot:weathered_copper_basin",
-    "fixfoot:waxed_weathered_copper_basin",
-    "fixfoot:oxidized_copper_basin",
-    "fixfoot:waxed_oxidized_copper_basin",
     "fixfoot:copper_gutter",
     "fixfoot:waxed_copper_gutter",
     "fixfoot:exposed_copper_gutter",
@@ -32,6 +24,14 @@
     "fixfoot:weathered_copper_drain",
     "fixfoot:waxed_weathered_copper_drain",
     "fixfoot:oxidized_copper_drain",
-    "fixfoot:waxed_oxidized_copper_drain"
+    "fixfoot:waxed_oxidized_copper_drain",
+    "fixfoot:copper_basin",
+    "fixfoot:waxed_copper_basin",
+    "fixfoot:exposed_copper_basin",
+    "fixfoot:waxed_exposed_copper_basin",
+    "fixfoot:weathered_copper_basin",
+    "fixfoot:waxed_weathered_copper_basin",
+    "fixfoot:oxidized_copper_basin",
+    "fixfoot:waxed_oxidized_copper_basin"
   ]
 }

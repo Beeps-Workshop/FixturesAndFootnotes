@@ -240,8 +240,10 @@ def main():
     # stripped + planks materials each also cut into their own.
     # Only the stonecutting recipes are generated, so the hand-written crafting ones are moved
     # aside and restored rather than wiped.
+    # Only the slat cuts are ours to rebuild; other generators put their own stonecutter recipes
+    # in here too, and a bare "stonecutting" test would eat them.
     handwritten = {f: open(f"{DATA}/recipe/{f}").read()
-                   for f in os.listdir(f"{DATA}/recipe") if "stonecutting" not in f} \
+                   for f in os.listdir(f"{DATA}/recipe") if "_slats_from_" not in f} \
         if os.path.isdir(f"{DATA}/recipe") else {}
     shutil.rmtree(f"{DATA}/recipe", ignore_errors=True)
     shutil.rmtree(f"{DATA}/advancement/recipes/{SLAT_ADVANCEMENTS}", ignore_errors=True)
