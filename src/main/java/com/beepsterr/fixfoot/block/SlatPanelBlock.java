@@ -23,6 +23,11 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+//? if >=1.21.2 {
+/*import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+*///?}
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.MultifaceSpreader;
@@ -149,10 +154,12 @@ public class SlatPanelBlock extends MultifaceBlock {
         return face.getAxis() != Direction.Axis.Y; // walls only, no floor/ceiling
     }
 
+    //? if <1.21.2 {
     @Override
     public MultifaceSpreader getSpreader() {
         return spreader;
     }
+    //?}
 
     @Override
     protected boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
@@ -194,9 +201,20 @@ public class SlatPanelBlock extends MultifaceBlock {
     }
 
     @Override
+    //? if >=1.21.2 {
+    /*protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess tickAccess,
+                                     BlockPos pos, Direction direction, BlockPos neighborPos,
+                                     BlockState neighborState, RandomSource random) {
+    *///?} else {
     protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    //?}
+        //? if >=1.21.2 {
+        /*BlockState result = super.updateShape(state, level, tickAccess, pos, direction, neighborPos,
+                neighborState, random);
+        *///?} else {
         BlockState result = super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+        //?}
         // If one face lost its support but the block survives on another face, vanilla
         // MultifaceBlock removes that face silently. Each face is a placed slat, so drop it back.
         if (level instanceof ServerLevel serverLevel

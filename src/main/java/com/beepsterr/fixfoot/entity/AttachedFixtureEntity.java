@@ -190,13 +190,24 @@ public abstract class AttachedFixtureEntity extends HangingEntity {
     }
 
     protected void dropStack(ItemStack stack) {
-        if (!stack.isEmpty()) {
-            spawnAtLocation(stack);
+        if (stack.isEmpty()) {
+            return;
         }
+        //? if >=1.21.2 {
+        /*if (level() instanceof ServerLevel server) {
+            spawnAtLocation(server, stack);
+        }
+        *///?} else {
+        spawnAtLocation(stack);
+        //?}
     }
 
     @Override
+    //? if >=1.21.2 {
+    /*public void dropItem(ServerLevel level, Entity breaker) {
+    *///?} else {
     public void dropItem(Entity breaker) {
+    //?}
         //? if >=1.21.2 {
         /*if (!(level() instanceof ServerLevel server)
                 || !server.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {

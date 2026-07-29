@@ -7,6 +7,8 @@ import com.beepsterr.fixfoot.entity.WidePlanterEntity;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 
@@ -22,7 +24,7 @@ public final class ModEntities {
                     .sized(WidePlanterEntity.WIDTH, WidePlanterEntity.HEIGHT)
                     .clientTrackingRange(10)
                     .updateInterval(Integer.MAX_VALUE)
-                    .build("wide_planter"));
+                    .build(buildKey("wide_planter")));
 
     public static final RegistrySupplier<EntityType<SmallStorageNetEntity>> SMALL_STORAGE_NET =
             ENTITY_TYPES.register("small_storage_net", () -> EntityType.Builder
@@ -30,7 +32,7 @@ public final class ModEntities {
                     .sized(SmallStorageNetEntity.WIDTH, SmallStorageNetEntity.HANG)
                     .clientTrackingRange(10)
                     .updateInterval(Integer.MAX_VALUE)
-                    .build("small_storage_net"));
+                    .build(buildKey("small_storage_net")));
 
     public static final RegistrySupplier<EntityType<WallStorageNetEntity>> STORAGE_NET =
             ENTITY_TYPES.register("storage_net", () -> EntityType.Builder
@@ -38,10 +40,25 @@ public final class ModEntities {
                     .sized(WallStorageNetEntity.WIDTH, WallStorageNetEntity.HEIGHT)
                     .clientTrackingRange(10)
                     .updateInterval(Integer.MAX_VALUE)
-                    .build("storage_net"));
+                    .build(buildKey("storage_net")));
 
     private ModEntities() {
     }
+
+    /**
+     * What {@code EntityType.Builder.build} wants for an id: a bare name before 1.21.2, a registry
+     * key after. Returning whichever the version expects keeps the call sites version-agnostic.
+     */
+    //? if >=1.21.2 {
+    /*private static ResourceKey<EntityType<?>> buildKey(String name) {
+        return ResourceKey.create(Registries.ENTITY_TYPE,
+                ResourceLocation.fromNamespaceAndPath(Fixfoot.MOD_ID, name));
+    }
+    *///?} else {
+    private static String buildKey(String name) {
+        return name;
+    }
+    //?}
 
     public static void register() {
         ENTITY_TYPES.register();

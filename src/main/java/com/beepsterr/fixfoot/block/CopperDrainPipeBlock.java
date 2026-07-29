@@ -11,6 +11,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+//? if >=1.21.2 {
+/*import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+*///?}
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -128,10 +133,15 @@ public class CopperDrainPipeBlock extends Block {
     }
 
     @Override
+    //? if >=1.21.2 {
+    /*protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess tickAccess,
+                                     BlockPos pos, Direction direction, BlockPos neighborPos,
+                                     BlockState neighborState, RandomSource random) {
+    *///?} else {
     protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        return direction == Direction.UP ? connect(state, level, pos)
-                : super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+    //?}
+        return direction == Direction.UP ? connect(state, level, pos) : state;
     }
 
     /**

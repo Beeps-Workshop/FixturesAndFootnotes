@@ -2,6 +2,7 @@ package com.beepsterr.fixfoot.block;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -263,7 +264,11 @@ public class CopperBasinBlock extends Block {
         if (entity.getY() < pos.getY() + contentHeight(state)
                 && entity.getBoundingBox().maxY > pos.getY() + FLOOR / 16.0) {
             entity.clearFire();
+            //? if >=1.21.2 {
+            /*if (level instanceof ServerLevel server && entity.mayInteract(server, pos)) {
+            *///?} else {
             if (entity.mayInteract(level, pos)) {
+            //?}
                 setLevel(state, level, pos, fill - 1);
             }
         }

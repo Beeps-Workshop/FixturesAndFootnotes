@@ -59,11 +59,19 @@ public class SlatScreenBlock extends Block {
     }
 
     @Override
+    //? if >=1.21.2 {
+    /*public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData) {
+    *///?} else {
     public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    //?}
         // Screen shares the wall slats' item — derive it from this block's id (…_slat_screen → …_slats).
         ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(this);
         ResourceLocation itemId = ResourceLocation.fromNamespaceAndPath(
                 blockId.getNamespace(), blockId.getPath().replace("_slat_screen", "_slats"));
+        //? if >=1.21.2 {
+        /*return new ItemStack(BuiltInRegistries.ITEM.getValue(itemId));
+        *///?} else {
         return new ItemStack(BuiltInRegistries.ITEM.get(itemId));
+        //?}
     }
 }
