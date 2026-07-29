@@ -25,14 +25,30 @@ public class StorageNetRenderer extends AttachedFixtureRenderer<StorageNetEntity
     }
 
     @Override
-    protected void renderContents(StorageNetEntity net, PoseStack poseStack,
-                                  MultiBufferSource buffers, int packedLight) {
+    protected void extractContents(StorageNetEntity net, FixtureRenderState into) {
         for (int slot = 0; slot < net.previewCount(); slot++) {
             ItemStack stack = net.getPreview(slot);
-            if (stack.isEmpty()) {
+            into.previews.add(stack);
+            into.previewOffsets.add(net.previewOffset(slot));
+            //? if >=1.21.2 {
+            /*net.minecraft.client.renderer.item.ItemStackRenderState resolved =
+                    new net.minecraft.client.renderer.item.ItemStackRenderState();
+            if (!stack.isEmpty()) {
+                itemModels.updateForNonLiving(resolved, stack, ItemDisplayContext.GROUND, net);
+            }
+            into.previewModels.add(resolved);
+            *///?}
+        }
+    }
+
+    @Override
+    protected void renderContents(FixtureRenderState from, PoseStack poseStack,
+                                  MultiBufferSource buffers, int packedLight) {
+        for (int slot = 0; slot < from.previews.size(); slot++) {
+            if (from.previews.get(slot).isEmpty()) {
                 continue;
             }
-            Vec3 at = net.previewOffset(slot);
+            Vec3 at = from.previewOffsets.get(slot);
             poseStack.pushPose();
             poseStack.translate(at.x, at.y, at.z);
             // Tip the sprite flat so it lies in the net like a dropped item, then spin it in that
@@ -40,8 +56,12 @@ public class StorageNetRenderer extends AttachedFixtureRenderer<StorageNetEntity
             poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
             poseStack.mulPose(Axis.ZP.rotationDegrees(SPIN[slot % SPIN.length]));
             poseStack.scale(ITEM_SCALE, ITEM_SCALE, ITEM_SCALE);
-            itemRenderer.renderStatic(stack, ItemDisplayContext.GROUND, packedLight,
-                    OverlayTexture.NO_OVERLAY, poseStack, buffers, net.level(), 0);
+            //? if >=1.21.2 {
+            /*from.previewModels.get(slot).render(poseStack, buffers, packedLight, OverlayTexture.NO_OVERLAY);
+            *///?} else {
+            itemRenderer.renderStatic(from.previews.get(slot), ItemDisplayContext.GROUND, packedLight,
+                    OverlayTexture.NO_OVERLAY, poseStack, buffers, from.level, 0);
+            //?}
             poseStack.popPose();
         }
     }
