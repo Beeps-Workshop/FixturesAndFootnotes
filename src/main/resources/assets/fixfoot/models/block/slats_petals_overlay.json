@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "petals": "minecraft:block/pink_petals",
+    "particle": "minecraft:block/pink_petals"
+  },
+  "elements": [
+    {
+      "__comment": "Mirrors slats_vine_overlay: one plane per bar, 1px in front (bars end at z=2). UVs match world X so the blossoms read as one scatter across the bars rather than repeating per bar. Deliberately no tintindex — the client colour handler tints index 0 foliage-green, which would turn the petals olive.",
+      "from": [1, 0, 3],
+      "to": [3, 16, 3],
+      "faces": {
+        "south": {"uv": [1, 0, 3, 16], "texture": "#petals"},
+        "north": {"uv": [3, 0, 1, 16], "texture": "#petals"}
+      }
+    },
+    {
+      "from": [5, 0, 3],
+      "to": [7, 16, 3],
+      "faces": {
+        "south": {"uv": [5, 0, 7, 16], "texture": "#petals"},
+        "north": {"uv": [7, 0, 5, 16], "texture": "#petals"}
+      }
+    },
+    {
+      "from": [9, 0, 3],
+      "to": [11, 16, 3],
+      "faces": {
+        "south": {"uv": [9, 0, 11, 16], "texture": "#petals"},
+        "north": {"uv": [11, 0, 9, 16], "texture": "#petals"}
+      }
+    },
+    {
+      "from": [13, 0, 3],
+      "to": [15, 16, 3],
+      "faces": {
+        "south": {"uv": [13, 0, 15, 16], "texture": "#petals"},
+        "north": {"uv": [15, 0, 13, 16], "texture": "#petals"}
+      }
+    }
+  ]
+}
