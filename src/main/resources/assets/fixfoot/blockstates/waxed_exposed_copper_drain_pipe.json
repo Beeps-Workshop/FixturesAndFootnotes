@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "connected=false,facing=north": {
+      "model": "fixfoot:block/exposed_copper_drain_pipe"
+    },
+    "connected=false,facing=east": {
+      "model": "fixfoot:block/exposed_copper_drain_pipe"
+    },
+    "connected=false,facing=south": {
+      "model": "fixfoot:block/exposed_copper_drain_pipe"
+    },
+    "connected=false,facing=west": {
+      "model": "fixfoot:block/exposed_copper_drain_pipe"
+    },
+    "connected=true,facing=north": {
+      "model": "fixfoot:block/exposed_copper_drain_pipe_connected"
+    },
+    "connected=true,facing=east": {
+      "model": "fixfoot:block/exposed_copper_drain_pipe_connected",
+      "y": 90,
+      "uvlock": true
+    },
+    "connected=true,facing=south": {
+      "model": "fixfoot:block/exposed_copper_drain_pipe_connected",
+      "y": 180,
+      "uvlock": true
+    },
+    "connected=true,facing=west": {
+      "model": "fixfoot:block/exposed_copper_drain_pipe_connected",
+      "y": 270,
+      "uvlock": true
+    }
+  }
+}

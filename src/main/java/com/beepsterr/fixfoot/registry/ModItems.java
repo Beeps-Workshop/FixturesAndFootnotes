@@ -40,16 +40,16 @@ public final class ModItems {
             "storage_net",
             () -> new AttachedFixtureItem(WallStorageNetEntity::new, new Item.Properties()));
 
-    /** Plain block items, one per basin, in the same order as {@link ModBlocks#BASINS}. */
-    public static final Map<String, RegistrySupplier<Item>> BASIN_ITEMS = new LinkedHashMap<>();
+    /** Plain block items, one per copper block, in the same order as {@link ModBlocks#COPPER}. */
+    public static final Map<String, RegistrySupplier<Item>> COPPER_ITEMS = new LinkedHashMap<>();
 
     // One item per variant — places wall slats on a wall face, the standing screen on a floor.
     public static final Map<String, RegistrySupplier<Item>> SLAT_ITEMS = new LinkedHashMap<>();
 
     static {
-        for (String name : ModBlocks.BASINS.keySet()) {
-            BASIN_ITEMS.put(name, ITEMS.register(name,
-                    () -> new BlockItem(ModBlocks.BASINS.get(name).get(), new Item.Properties())));
+        for (String name : ModBlocks.COPPER.keySet()) {
+            COPPER_ITEMS.put(name, ITEMS.register(name,
+                    () -> new BlockItem(ModBlocks.COPPER.get(name).get(), new Item.Properties())));
         }
     }
 

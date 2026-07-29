@@ -9,6 +9,24 @@
     },
     "fixfoot:weathered_copper_basin": {
       "next_oxidation_stage": "fixfoot:oxidized_copper_basin"
+    },
+    "fixfoot:copper_gutter": {
+      "next_oxidation_stage": "fixfoot:exposed_copper_gutter"
+    },
+    "fixfoot:exposed_copper_gutter": {
+      "next_oxidation_stage": "fixfoot:weathered_copper_gutter"
+    },
+    "fixfoot:weathered_copper_gutter": {
+      "next_oxidation_stage": "fixfoot:oxidized_copper_gutter"
+    },
+    "fixfoot:copper_drain_pipe": {
+      "next_oxidation_stage": "fixfoot:exposed_copper_drain_pipe"
+    },
+    "fixfoot:exposed_copper_drain_pipe": {
+      "next_oxidation_stage": "fixfoot:weathered_copper_drain_pipe"
+    },
+    "fixfoot:weathered_copper_drain_pipe": {
+      "next_oxidation_stage": "fixfoot:oxidized_copper_drain_pipe"
     }
   }
 }

@@ -33,6 +33,12 @@ WOODS = {
     "bamboo": "block",
 }
 
+# Planks one log/stem/block yields in vanilla. Cutting a log straight into plank slats pays out
+# this many times the usual 8, so the shortcut matches going log -> planks -> slats by hand
+# instead of quietly throwing away 3/4 of the wood.
+PLANKS_PER_LOG = {"bamboo": 2}
+DEFAULT_PLANKS_PER_LOG = 4
+
 # Non-wood materials. Single variant each, no stripped/planks fan-out. These copy their vanilla
 # block's properties in code (light level, sound, hardness), so glowstone slats glow etc.
 # tool = which mineable/<tool> tag to list them in (None = no tool tag, like their vanilla block).
@@ -155,11 +161,11 @@ def merge_tag(path, values):
     write(path, {"replace": False, "values": kept + values})
 
 
-def stonecut_recipe(base, result_item):
+def stonecut_recipe(base, result_item, count=8):
     return {
         "type": "minecraft:stonecutting",
         "ingredient": {"item": base},
-        "result": {"count": 8, "id": result_item},
+        "result": {"count": count, "id": result_item},
     }
 
 
@@ -187,9 +193,9 @@ def unlock_advancement(recipe_id, ingredient):
     }
 
 
-def cut(name, base, result_item):
+def cut(name, base, result_item, count=8):
     """One stonecutter recipe plus the advancement that makes it discoverable."""
-    write(f"{DATA}/recipe/{name}.json", stonecut_recipe(base, result_item))
+    write(f"{DATA}/recipe/{name}.json", stonecut_recipe(base, result_item, count))
     write(f"{DATA}/advancement/recipes/{SLAT_ADVANCEMENTS}/{name}.json",
           unlock_advancement(f"{MODID}:{name}", base))
 
@@ -246,8 +252,13 @@ def main():
     for wood, noun in WOODS.items():
         mats = wood_materials(wood, noun)  # [log, stripped, planks]
         log_key, log_base = mats[0][0], mats[0][1]
+        planks_key = mats[2][0]
+        per_log = PLANKS_PER_LOG.get(wood, DEFAULT_PLANKS_PER_LOG)
         for (key, base, tex, disp) in mats:
-            cut(f"{key}_slats_from_{log_key}_stonecutting", log_base, f"{MODID}:{key}_slats")
+            # log -> log/stripped slats is 1:1, but log -> plank slats has to pay out the planks
+            # the log would have made.
+            count = 8 * per_log if key == planks_key else 8
+            cut(f"{key}_slats_from_{log_key}_stonecutting", log_base, f"{MODID}:{key}_slats", count)
         for (key, base, tex, disp) in mats[1:]:
             cut(f"{key}_slats_from_{key}_stonecutting", base, f"{MODID}:{key}_slats")
     for key, base, _tex, _disp, _field, _tool in EXTRAS:

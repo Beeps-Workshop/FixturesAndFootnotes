@@ -1,0 +1,6 @@
+{
+  "parent": "fixfoot:block/gutter_base",
+  "textures": {
+    "body": "minecraft:block/oxidized_copper"
+  }
+}

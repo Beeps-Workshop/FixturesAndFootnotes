@@ -2,16 +2,22 @@ package com.beepsterr.fixfoot.registry;
 
 import com.beepsterr.fixfoot.Fixfoot;
 import com.beepsterr.fixfoot.block.CopperBasinBlock;
+import com.beepsterr.fixfoot.block.CopperDrainPipeBlock;
+import com.beepsterr.fixfoot.block.CopperGutterBlock;
 import com.beepsterr.fixfoot.block.SlatPanelBlock;
 import com.beepsterr.fixfoot.block.SheetmetalBlock;
 import com.beepsterr.fixfoot.block.SlatScreenBlock;
 import com.beepsterr.fixfoot.block.WeatheringCopperBasinBlock;
+import com.beepsterr.fixfoot.block.WeatheringCopperDrainPipeBlock;
+import com.beepsterr.fixfoot.block.WeatheringCopperGutterBlock;
 import com.beepsterr.fixfoot.content.SlatVariants;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
@@ -35,40 +41,56 @@ public final class ModBlocks {
 
     /**
      * The copper oxidation chain, freshest first: each stage weathers into the next, and each has
-     * a waxed twin that doesn't. {@code tools/gen_basin.py} builds the assets from the same list.
+     * a waxed twin that doesn't. The generators build their assets from the same list.
      */
-    public static final List<WeatheringCopper.WeatherState> BASIN_STAGES = List.of(
+    public static final List<WeatheringCopper.WeatherState> COPPER_STAGES = List.of(
             WeatheringCopper.WeatherState.UNAFFECTED,
             WeatheringCopper.WeatherState.EXPOSED,
             WeatheringCopper.WeatherState.WEATHERED,
             WeatheringCopper.WeatherState.OXIDIZED);
 
-    /** Every basin keyed by id, the four stages first and then their waxed twins. */
-    public static final Map<String, RegistrySupplier<Block>> BASINS = new LinkedHashMap<>();
+    /** The copper things that weather, by the tail of their id — used to walk every family. */
+    public static final List<String> COPPER_FAMILIES = List.of("basin", "gutter", "drain_pipe");
 
-    /** e.g. {@code (WEATHERED, true)} -> {@code waxed_weathered_copper_basin}. */
-    public static String basinName(WeatheringCopper.WeatherState stage, boolean waxed) {
+    /** e.g. {@code (WEATHERED, true, "basin")} -> {@code waxed_weathered_copper_basin}. */
+    public static String copperName(WeatheringCopper.WeatherState stage, boolean waxed, String family) {
         String age = stage == WeatheringCopper.WeatherState.UNAFFECTED ? "" : stage.getSerializedName() + "_";
-        return (waxed ? "waxed_" : "") + age + "copper_basin";
+        return (waxed ? "waxed_" : "") + age + "copper_" + family;
     }
+
+    /** Every copper block keyed by id: per family, the four stages and then their waxed twins. */
+    public static final Map<String, RegistrySupplier<Block>> COPPER = new LinkedHashMap<>();
 
     // Per-variant slat blocks: a wall-hugging multiface block + a standing screen, keyed by variant.
     public static final Map<String, RegistrySupplier<Block>> WALL = new LinkedHashMap<>();
     public static final Map<String, RegistrySupplier<Block>> SCREEN = new LinkedHashMap<>();
 
     static {
-        for (WeatheringCopper.WeatherState stage : BASIN_STAGES) {
-            BASINS.put(basinName(stage, false), BLOCKS.register(basinName(stage, false),
-                    () -> new WeatheringCopperBasinBlock(stage, basinProperties(Blocks.COPPER_BLOCK))));
+        copperFamily("basin", WeatheringCopperBasinBlock::new, CopperBasinBlock::new);
+        copperFamily("gutter", WeatheringCopperGutterBlock::new, CopperGutterBlock::new);
+        copperFamily("drain_pipe", WeatheringCopperDrainPipeBlock::new, CopperDrainPipeBlock::new);
+    }
+
+    /**
+     * Registers one family's eight blocks: the four ageing stages, then the waxed twins that never
+     * change. Waxed copies the vanilla waxed block's properties, so they don't idle on random ticks.
+     */
+    private static void copperFamily(
+            String family,
+            BiFunction<WeatheringCopper.WeatherState, BlockBehaviour.Properties, Block> ageing,
+            Function<BlockBehaviour.Properties, Block> waxed) {
+        for (WeatheringCopper.WeatherState stage : COPPER_STAGES) {
+            String id = copperName(stage, false, family);
+            COPPER.put(id, BLOCKS.register(id, () -> ageing.apply(stage, copperProperties(Blocks.COPPER_BLOCK))));
         }
-        for (WeatheringCopper.WeatherState stage : BASIN_STAGES) {
-            BASINS.put(basinName(stage, true), BLOCKS.register(basinName(stage, true),
-                    () -> new CopperBasinBlock(basinProperties(Blocks.WAXED_COPPER_BLOCK))));
+        for (WeatheringCopper.WeatherState stage : COPPER_STAGES) {
+            String id = copperName(stage, true, family);
+            COPPER.put(id, BLOCKS.register(id, () -> waxed.apply(copperProperties(Blocks.WAXED_COPPER_BLOCK))));
         }
     }
 
-    /** Copper's hardness, sound and tool, but open-topped so it doesn't cull its neighbours. */
-    private static BlockBehaviour.Properties basinProperties(Block copper) {
+    /** Copper's hardness, sound and tool, but open so it doesn't cull its neighbours. */
+    private static BlockBehaviour.Properties copperProperties(Block copper) {
         return BlockBehaviour.Properties.ofFullCopy(copper).noOcclusion();
     }
 

@@ -3,8 +3,6 @@
   "values": [
     "fixfoot:copper_sheetmetal",
     "fixfoot:iron_sheetmetal",
-    "fixfoot:magma_slats",
-    "fixfoot:magma_slat_screen",
     "fixfoot:copper_basin",
     "fixfoot:waxed_copper_basin",
     "fixfoot:exposed_copper_basin",
@@ -12,6 +10,24 @@
     "fixfoot:weathered_copper_basin",
     "fixfoot:waxed_weathered_copper_basin",
     "fixfoot:oxidized_copper_basin",
-    "fixfoot:waxed_oxidized_copper_basin"
+    "fixfoot:waxed_oxidized_copper_basin",
+    "fixfoot:magma_slats",
+    "fixfoot:magma_slat_screen",
+    "fixfoot:copper_gutter",
+    "fixfoot:waxed_copper_gutter",
+    "fixfoot:exposed_copper_gutter",
+    "fixfoot:waxed_exposed_copper_gutter",
+    "fixfoot:weathered_copper_gutter",
+    "fixfoot:waxed_weathered_copper_gutter",
+    "fixfoot:oxidized_copper_gutter",
+    "fixfoot:waxed_oxidized_copper_gutter",
+    "fixfoot:copper_drain_pipe",
+    "fixfoot:waxed_copper_drain_pipe",
+    "fixfoot:exposed_copper_drain_pipe",
+    "fixfoot:waxed_exposed_copper_drain_pipe",
+    "fixfoot:weathered_copper_drain_pipe",
+    "fixfoot:waxed_weathered_copper_drain_pipe",
+    "fixfoot:oxidized_copper_drain_pipe",
+    "fixfoot:waxed_oxidized_copper_drain_pipe"
   ]
 }

@@ -50,7 +50,7 @@ public final class FixfootClient {
         // biome like a cauldron's. The copper itself is untinted, so it needs no index.
         BlockColor water = (state, level, pos, tintIndex) ->
                 (level != null && pos != null) ? BiomeColors.getAverageWaterColor(level, pos) : -1;
-        for (RegistrySupplier<Block> basin : ModBlocks.BASINS.values()) {
+        for (RegistrySupplier<Block> basin : ModBlocks.COPPER.values()) {
             ColorHandlerRegistry.registerBlockColors(water, basin.get());
         }
     }

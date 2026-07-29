@@ -11,27 +11,29 @@ public final class FixfootFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         Fixfoot.init();
-        registerBasinWeathering();
+        registerCopperWeathering();
     }
 
     /**
-     * Teaches Fabric's copies of the vanilla oxidation/waxing maps about the basins, which gets
-     * both the random weathering tick and axe-scraping/honeycomb-waxing. NeoForge does the same
+     * Teaches Fabric's copies of the vanilla oxidation/waxing maps about every copper family, which
+     * gets both the random weathering tick and axe-scraping/honeycomb-waxing. NeoForge does the same
      * job from JSON — see {@code data/neoforge/data_maps/block/}.
      */
-    private static void registerBasinWeathering() {
-        for (int i = 0; i < ModBlocks.BASIN_STAGES.size(); i++) {
-            WeatheringCopper.WeatherState stage = ModBlocks.BASIN_STAGES.get(i);
-            Block unwaxed = basin(stage, false);
-            OxidizableBlocksRegistry.registerWaxableBlockPair(unwaxed, basin(stage, true));
-            if (i + 1 < ModBlocks.BASIN_STAGES.size()) {
-                OxidizableBlocksRegistry.registerOxidizableBlockPair(
-                        unwaxed, basin(ModBlocks.BASIN_STAGES.get(i + 1), false));
+    private static void registerCopperWeathering() {
+        for (String family : ModBlocks.COPPER_FAMILIES) {
+            for (int i = 0; i < ModBlocks.COPPER_STAGES.size(); i++) {
+                WeatheringCopper.WeatherState stage = ModBlocks.COPPER_STAGES.get(i);
+                Block unwaxed = block(stage, false, family);
+                OxidizableBlocksRegistry.registerWaxableBlockPair(unwaxed, block(stage, true, family));
+                if (i + 1 < ModBlocks.COPPER_STAGES.size()) {
+                    OxidizableBlocksRegistry.registerOxidizableBlockPair(
+                            unwaxed, block(ModBlocks.COPPER_STAGES.get(i + 1), false, family));
+                }
             }
         }
     }
 
-    private static Block basin(WeatheringCopper.WeatherState stage, boolean waxed) {
-        return ModBlocks.BASINS.get(ModBlocks.basinName(stage, waxed)).get();
+    private static Block block(WeatheringCopper.WeatherState stage, boolean waxed, String family) {
+        return ModBlocks.COPPER.get(ModBlocks.copperName(stage, waxed, family)).get();
     }
 }

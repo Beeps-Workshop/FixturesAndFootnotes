@@ -23,8 +23,8 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.STORAGE_NET.get());
                         output.accept(ModItems.COPPER_SHEETMETAL.get());
                         output.accept(ModItems.IRON_SHEETMETAL.get());
-                        for (RegistrySupplier<Item> basin : ModItems.BASIN_ITEMS.values()) {
-                            output.accept(basin.get());
+                        for (RegistrySupplier<Item> copper : ModItems.COPPER_ITEMS.values()) {
+                            output.accept(copper.get());
                         }
                         for (String key : com.beepsterr.fixfoot.content.SlatVariants.KEYS) {
                             output.accept(ModItems.SLAT_ITEMS.get(key).get());

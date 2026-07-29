@@ -94,5 +94,21 @@
   "block.fixfoot.weathered_copper_basin": "Weathered Copper Basin",
   "block.fixfoot.waxed_weathered_copper_basin": "Waxed Weathered Copper Basin",
   "block.fixfoot.oxidized_copper_basin": "Oxidized Copper Basin",
-  "block.fixfoot.waxed_oxidized_copper_basin": "Waxed Oxidized Copper Basin"
+  "block.fixfoot.waxed_oxidized_copper_basin": "Waxed Oxidized Copper Basin",
+  "block.fixfoot.copper_gutter": "Copper Gutter",
+  "block.fixfoot.waxed_copper_gutter": "Waxed Copper Gutter",
+  "block.fixfoot.exposed_copper_gutter": "Exposed Copper Gutter",
+  "block.fixfoot.waxed_exposed_copper_gutter": "Waxed Exposed Copper Gutter",
+  "block.fixfoot.weathered_copper_gutter": "Weathered Copper Gutter",
+  "block.fixfoot.waxed_weathered_copper_gutter": "Waxed Weathered Copper Gutter",
+  "block.fixfoot.oxidized_copper_gutter": "Oxidized Copper Gutter",
+  "block.fixfoot.waxed_oxidized_copper_gutter": "Waxed Oxidized Copper Gutter",
+  "block.fixfoot.copper_drain_pipe": "Copper Drain Pipe",
+  "block.fixfoot.waxed_copper_drain_pipe": "Waxed Copper Drain Pipe",
+  "block.fixfoot.exposed_copper_drain_pipe": "Exposed Copper Drain Pipe",
+  "block.fixfoot.waxed_exposed_copper_drain_pipe": "Waxed Exposed Copper Drain Pipe",
+  "block.fixfoot.weathered_copper_drain_pipe": "Weathered Copper Drain Pipe",
+  "block.fixfoot.waxed_weathered_copper_drain_pipe": "Waxed Weathered Copper Drain Pipe",
+  "block.fixfoot.oxidized_copper_drain_pipe": "Oxidized Copper Drain Pipe",
+  "block.fixfoot.waxed_oxidized_copper_drain_pipe": "Waxed Oxidized Copper Drain Pipe"
 }

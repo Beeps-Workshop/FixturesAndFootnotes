@@ -18,10 +18,9 @@ from the constants below; CopperBasinBlock repeats them for its collision shape.
 import json
 import os
 
+import authored
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# The authored basin, exported from assets/models/blockbench/CopperBasin.bbmodel. Geometry lives
-# there, not here — this only rebinds its two texture slots per stage and drops the water quad in.
-SOURCE = os.path.join(ROOT, "assets/models/json/CopperBasin.json")
 RES = os.path.join(ROOT, "src/main/resources")
 ASSETS = os.path.join(RES, "assets/fixfoot")
 DATA = os.path.join(RES, "data/fixfoot")
@@ -65,39 +64,17 @@ def write(path, obj):
 
 
 def base_model(level):
-    """
-    The authored model with its Blockbench slots renamed, plus the water surface for this level.
-
-    Reading the export rather than restating the geometry means re-exporting from Blockbench is
-    the whole edit — the same trick render_icon.py uses for the planter.
-    """
-    src = json.load(open(SOURCE))
-    elements = []
-    for element in src["elements"]:
-        faces = {}
-        for side, face in element.get("faces", {}).items():
-            face = dict(face)
-            face["texture"] = "#" + SLOTS[face["texture"].lstrip("#")]
-            faces[side] = face
-        elements.append({"from": element["from"], "to": element["to"], "faces": faces})
-
+    """The authored bowl, plus the water surface for this level."""
+    water = []
     if level > 0:
-        elements.append({
+        water.append({
             "__comment": "Water surface. A flat quad like a cauldron's — no fluid is rendered; "
                          "tintindex 0 is the biome water colour, applied in FixfootClient.",
             "from": [2, FLOOR, 2],
             "to": [14, FLOOR + WATER_PER_LEVEL * level, 14],
             "faces": {"up": {"texture": "#content", "tintindex": 0}},
         })
-
-    model = {"ambientocclusion": False, "textures": {"particle": "#body"}, "elements": elements}
-    # The authored item transforms. These models have no parent, so without a display block the
-    # basin item would inherit nothing and render untransformed in the GUI and in hand. Slots
-    # Minecraft doesn't know (Blockbench emits a few newer ones) are ignored on load, so the
-    # export is copied through as-authored.
-    if "display" in src:
-        model["display"] = src["display"]
-    return model
+    return authored.load("CopperBasin", SLOTS, water)
 
 
 def suffix(level):
@@ -113,6 +90,13 @@ def block_loot(item):
             "conditions": [{"condition": "minecraft:survives_explosion"}],
         }],
     }
+
+
+def merge_map(path, values):
+    """Fold entries into a NeoForge data map, leaving the other copper families' alone."""
+    existing = json.load(open(path))["values"] if os.path.exists(path) else {}
+    existing.update(values)
+    write(path, {"replace": False, "values": existing})
 
 
 def merge(path, values, mine):
@@ -199,15 +183,15 @@ def main():
     # NeoForge drives weathering and waxing from data maps; Fabric registers the same pairs in
     # code (see FixfootFabric). Harmless dead data on Fabric, which never reads this namespace.
     maps = os.path.join(RES, "data/neoforge/data_maps/block")
-    write(f"{maps}/oxidizables.json", {"replace": False, "values": {
+    merge_map(f"{maps}/oxidizables.json", {
         f"{MODID}:{name(STAGES[i][0], False)}": {
             "next_oxidation_stage": f"{MODID}:{name(STAGES[i + 1][0], False)}"}
         for i in range(len(STAGES) - 1)
-    }})
-    write(f"{maps}/waxables.json", {"replace": False, "values": {
+    })
+    merge_map(f"{maps}/waxables.json", {
         f"{MODID}:{name(prefix, False)}": {"waxed": f"{MODID}:{name(prefix, True)}"}
         for prefix, *_ in STAGES
-    }})
+    })
 
     lang_path = f"{ASSETS}/lang/en_us.json"
     if os.path.exists(lang_path):

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "waxed_copper_gutter",
+  "ingredients": [
+    {
+      "item": "fixfoot:copper_gutter"
+    },
+    {
+      "item": "minecraft:honeycomb"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "fixfoot:waxed_copper_gutter"
+  }
+}

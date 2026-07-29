@@ -1,0 +1,6 @@
+{
+  "parent": "fixfoot:block/drain_pipe_base_connected",
+  "textures": {
+    "body": "minecraft:block/weathered_copper"
+  }
+}
