@@ -1,5 +1,5 @@
 {
-  "parent": "fixfoot:block/gutter_base_outer",
+  "parent": "fixfoot:block/gutter_base_wide",
   "textures": {
     "body": "minecraft:block/weathered_copper"
   }

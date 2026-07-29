@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -18,7 +19,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.block.state.properties.StairsShape;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -40,13 +40,41 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class CopperGutterBlock extends Block {
     public static final MapCodec<? extends Block> CODEC = simpleCodec(CopperGutterBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final EnumProperty<StairsShape> SHAPE = BlockStateProperties.STAIRS_SHAPE;
+    public static final EnumProperty<GutterShape> SHAPE = EnumProperty.create("shape", GutterShape.class);
 
-    /** Channel footprint against the north wall, tracing the authored model. */
+    /**
+     * Which authored piece this block is. Not vanilla's {@code StairsShape}: a stair is symmetric
+     * front-to-back and a channel is not, so a gutter tells apart three corners where stairs see
+     * two — and it has no left/right pairs, because a corner's handedness is carried by which
+     * facing the corner itself takes.
+     */
+    public enum GutterShape implements StringRepresentable {
+        STRAIGHT("straight"),
+        /** Turns out the front edge, toward a neighbour facing left. */
+        INNER("inner"),
+        /** Crosses the block, then turns out the front edge toward a neighbour facing right. */
+        TIGHT("tight"),
+        /** Crosses the block, then wraps out the back edge toward a neighbour facing right. */
+        WIDE("wide"),
+        /** {@link #TIGHT} mirrored: the same turn the other way round, which no facing can reach. */
+        TIGHT_MIRRORED("tight_mirrored");
+
+        private final String name;
+
+        GutterShape(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getSerializedName() {
+            return name;
+        }
+    }
+
+    /** Footprints against the north wall, tracing each authored model. */
     private static final VoxelShape CHANNEL = box(0.0, 0.0, 0.0, 16.0, 2.0, 6.0);
-    /** An outer corner turns the run out across the block; the arm runs down one side. */
-    private static final VoxelShape ARM_RIGHT = box(10.0, 0.0, 0.0, 16.0, 2.0, 16.0);
-    private static final VoxelShape ARM_LEFT = box(0.0, 0.0, 0.0, 6.0, 2.0, 16.0);
+    private static final VoxelShape CORNER = box(0.0, 0.0, 0.0, 6.0, 2.0, 6.0);
+    private static final VoxelShape WRAP = Shapes.or(CHANNEL, box(10.0, 0.0, 0.0, 16.0, 2.0, 16.0));
 
     private final Map<BlockState, VoxelShape> shapes;
 
@@ -54,7 +82,7 @@ public class CopperGutterBlock extends Block {
         super(properties);
         registerDefaultState(defaultBlockState()
                 .setValue(FACING, Direction.NORTH)
-                .setValue(SHAPE, StairsShape.STRAIGHT));
+                .setValue(SHAPE, GutterShape.STRAIGHT));
         this.shapes = getShapeForEachState(CopperGutterBlock::calculateShape);
     }
 
@@ -75,9 +103,9 @@ public class CopperGutterBlock extends Block {
 
     private static VoxelShape calculateShape(BlockState state) {
         VoxelShape shape = switch (state.getValue(SHAPE)) {
-            case STRAIGHT, INNER_LEFT, INNER_RIGHT -> CHANNEL;
-            case OUTER_LEFT -> Shapes.or(CHANNEL, ARM_LEFT);
-            case OUTER_RIGHT -> Shapes.or(CHANNEL, ARM_RIGHT);
+            case STRAIGHT, TIGHT, TIGHT_MIRRORED -> CHANNEL;
+            case INNER -> CORNER;
+            case WIDE -> WRAP;
         };
         // Authored facing north; turn it to match.
         for (Direction facing = Direction.NORTH; facing != state.getValue(FACING); facing = facing.getClockWise()) {
@@ -112,8 +140,7 @@ public class CopperGutterBlock extends Block {
             facing = context.getHorizontalDirection();
         }
 
-        BlockState state = defaultBlockState().setValue(FACING, facing);
-        return state.setValue(SHAPE, shapeFor(state, context.getLevel(), pos));
+        return connect(defaultBlockState().setValue(FACING, facing), context.getLevel(), pos);
     }
 
     @Override
@@ -134,36 +161,87 @@ public class CopperGutterBlock extends Block {
     protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return direction.getAxis().isHorizontal()
-                ? state.setValue(SHAPE, shapeFor(state, level, pos))
+                ? connect(state, level, pos)
                 : super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
 
     /**
-     * Reads the corner off the run: a neighbour to either side whose channel backs onto a
-     * different axis means the run turns here. Which way it turns picks inner versus outer.
+     * Which neighbours each authored piece joins, described in the base (north-facing) frame as
+     * "a gutter on this side, backing onto that wall". Read straight off the models: the channel
+     * leaves a block edge at a fixed offset, and only one neighbour facing puts a channel there.
      */
-    private static StairsShape shapeFor(BlockState state, BlockGetter level, BlockPos pos) {
-        Direction facing = state.getValue(FACING);
+    private record Link(Direction side, Direction backsOnto) {
+    }
 
-        Direction right = facing.getClockWise();
-        BlockState beside = level.getBlockState(pos.relative(right));
-        if (isGutter(beside)) {
-            Direction other = beside.getValue(FACING);
-            if (other.getAxis() != facing.getAxis()) {
-                return other == right ? StairsShape.OUTER_RIGHT : StairsShape.INNER_RIGHT;
+    private static final Map<GutterShape, List<Link>> LINKS = Map.of(
+            GutterShape.STRAIGHT, List.of(new Link(Direction.WEST, Direction.NORTH),
+                                          new Link(Direction.EAST, Direction.NORTH)),
+            GutterShape.INNER, List.of(new Link(Direction.WEST, Direction.NORTH),
+                                       new Link(Direction.NORTH, Direction.WEST)),
+            GutterShape.TIGHT, List.of(new Link(Direction.WEST, Direction.NORTH),
+                                       new Link(Direction.NORTH, Direction.EAST)),
+            GutterShape.WIDE, List.of(new Link(Direction.WEST, Direction.NORTH),
+                                      new Link(Direction.SOUTH, Direction.EAST)),
+            GutterShape.TIGHT_MIRRORED, List.of(new Link(Direction.EAST, Direction.NORTH),
+                                                new Link(Direction.NORTH, Direction.WEST)));
+
+    /**
+     * Works out which piece this is from the run around it, deriving facing as well as shape.
+     *
+     * <p>Every corner is tried at every facing rather than pattern-matched, because the corners are
+     * not mirror-symmetric: an L turning left is a different piece from one turning right, and only
+     * some of those mirrors happen to coincide with another corner under another facing. Searching
+     * finds whichever of the sixteen states actually joins the neighbours that are there.
+     */
+    private static BlockState connect(BlockState state, BlockGetter level, BlockPos pos) {
+        for (GutterShape shape : List.of(GutterShape.INNER, GutterShape.TIGHT,
+                GutterShape.WIDE, GutterShape.TIGHT_MIRRORED)) {
+            for (Direction facing : Direction.Plane.HORIZONTAL) {
+                if (joins(shape, facing, level, pos)) {
+                    return state.setValue(FACING, facing).setValue(SHAPE, shape);
+                }
             }
         }
+        // Not a corner, so the facing the player placed it with stands.
+        return state.setValue(SHAPE, GutterShape.STRAIGHT);
+    }
 
-        Direction left = facing.getCounterClockWise();
-        beside = level.getBlockState(pos.relative(left));
-        if (isGutter(beside)) {
-            Direction other = beside.getValue(FACING);
-            if (other.getAxis() != facing.getAxis()) {
-                return other == left ? StairsShape.OUTER_LEFT : StairsShape.INNER_LEFT;
+    private static boolean joins(GutterShape shape, Direction facing, BlockGetter level, BlockPos pos) {
+        for (Link link : LINKS.get(shape)) {
+            Direction side = turn(link.side(), facing);
+            if (!linksBack(level, pos.relative(side), side.getOpposite(), turn(link.backsOnto(), facing))) {
+                return false;
             }
         }
+        return true;
+    }
 
-        return StairsShape.STRAIGHT;
+    /** Takes a direction from the authored north-facing frame into a block facing {@code facing}. */
+    private static Direction turn(Direction base, Direction facing) {
+        Direction turned = base;
+        for (Direction from = Direction.NORTH; from != facing; from = from.getClockWise()) {
+            turned = turned.getClockWise();
+        }
+        return turned;
+    }
+
+    /**
+     * Whether the gutter at {@code pos} can take a connection from {@code toUs} — it has to back
+     * onto the right wall for the channels to line up, and its own shape has to spend one of its
+     * links on us. A corner already using both of its links is full, so a run arriving at one is
+     * left as a straight rather than quietly stealing a connection the corner cannot return.
+     */
+    private static boolean linksBack(BlockGetter level, BlockPos pos, Direction toUs, Direction facing) {
+        BlockState state = level.getBlockState(pos);
+        if (!isGutter(state) || state.getValue(FACING) != facing) {
+            return false;
+        }
+        for (Link link : LINKS.get(state.getValue(SHAPE))) {
+            if (turn(link.side(), facing) == toUs) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** True for every ageing stage and their waxed twins, so runs corner across mismatched copper. */

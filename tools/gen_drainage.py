@@ -11,9 +11,10 @@ Geometry is not written here — it is read from the authored Blockbench exports
 assets/models/json/Drainage/, so reshaping a piece means re-exporting and re-running this. What
 this owns is the fan-out: which authored model each blockstate points at, and how far it is turned.
 
-The gutter follows vanilla's stairs scheme — three models (straight, inner corner, outer corner)
-cover all twenty facing/shape combinations, because the four facings and the left/right handedness
-are y-rotations. See assets/minecraft/blockstates/oak_stairs.json for the same trick.
+The gutter is deliberately not on vanilla's stairs scheme: a stair is symmetric front-to-back and
+a channel is not, so a gutter tells apart three corners where stairs see two. Four models cover all
+sixteen facing/shape combinations as plain y-rotations, with no mirrored pieces to author, because
+a corner's handedness lives in the facing CopperGutterBlock derives for it.
 
 No water yet: this is placement only, so the gutter has no filled state and the pipe has no flow.
 """
@@ -40,13 +41,15 @@ STAGES = [
     ("oxidized_", "Oxidized Copper", "minecraft:block/oxidized_copper"),
 ]
 
-# The authored pieces, keyed by the model suffix they get. The gutter's corners are named for how
-# the run turns: tight is the concave (inner) corner, wide the convex (outer) one that wraps a
-# building corner and so needs the whole block.
+# The authored pieces, keyed by the model suffix they get, matching CopperGutterBlock.GutterShape.
+# Every corner takes water in from the left and turns it out the front or back edge; they differ by
+# where along that edge, which is set by the facing of the gutter they hand off to.
 GUTTER_PARTS = {
     "": "Drainage/CopperGutter",
-    "_inner": "Drainage/CopperGutterCornerTight",
-    "_outer": "Drainage/CopperGutterCornerWide",
+    "_inner": "Drainage/CopperGutterCornerInner",
+    "_tight": "Drainage/CopperGutterCornerTight",
+    "_wide": "Drainage/CopperGutterCornerWide",
+    "_tight_mirrored": "Drainage/CopperGutterCornerTightM",
 }
 PIPE_PARTS = {
     "": "Drainage/CopperDrainagePipe",
@@ -79,16 +82,15 @@ def apply(model, y):
 
 def gutter_blockstate(stage_id):
     """
-    Twenty variants over three models. A left-handed corner is its right-handed twin turned a
-    quarter turn back, which is exactly how vanilla stairs avoid authoring mirrored models.
+    Sixteen variants over four models, one per shape and facing. There are no mirrored corners to
+    author: a corner's handedness lives in the facing the block derives for itself, so the mirror
+    of any corner is the same model under a different facing.
     """
     variants = {}
-    for facing, base in TURNS.items():
-        variants[f"facing={facing},shape=straight"] = apply(f"{MODID}:block/{stage_id}", base)
-        for corner in ("inner", "outer"):
-            model = f"{MODID}:block/{stage_id}_{corner}"
-            variants[f"facing={facing},shape={corner}_right"] = apply(model, base)
-            variants[f"facing={facing},shape={corner}_left"] = apply(model, (base + 270) % 360)
+    for facing, turn in TURNS.items():
+        for shape, part in (("straight", ""), ("inner", "_inner"), ("tight", "_tight"),
+                            ("wide", "_wide"), ("tight_mirrored", "_tight_mirrored")):
+            variants[f"facing={facing},shape={shape}"] = apply(f"{MODID}:block/{stage_id}{part}", turn)
     return {"variants": variants}
 
 

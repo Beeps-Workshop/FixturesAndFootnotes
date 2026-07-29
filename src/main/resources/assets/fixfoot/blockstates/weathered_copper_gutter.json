@@ -3,66 +3,66 @@
     "facing=north,shape=straight": {
       "model": "fixfoot:block/weathered_copper_gutter"
     },
-    "facing=north,shape=inner_right": {
+    "facing=north,shape=inner": {
       "model": "fixfoot:block/weathered_copper_gutter_inner"
     },
-    "facing=north,shape=inner_left": {
-      "model": "fixfoot:block/weathered_copper_gutter_inner",
-      "y": 270,
-      "uvlock": true
+    "facing=north,shape=tight": {
+      "model": "fixfoot:block/weathered_copper_gutter_tight"
     },
-    "facing=north,shape=outer_right": {
-      "model": "fixfoot:block/weathered_copper_gutter_outer"
+    "facing=north,shape=wide": {
+      "model": "fixfoot:block/weathered_copper_gutter_wide"
     },
-    "facing=north,shape=outer_left": {
-      "model": "fixfoot:block/weathered_copper_gutter_outer",
-      "y": 270,
-      "uvlock": true
+    "facing=north,shape=tight_mirrored": {
+      "model": "fixfoot:block/weathered_copper_gutter_tight_mirrored"
     },
     "facing=east,shape=straight": {
       "model": "fixfoot:block/weathered_copper_gutter",
       "y": 90,
       "uvlock": true
     },
-    "facing=east,shape=inner_right": {
+    "facing=east,shape=inner": {
       "model": "fixfoot:block/weathered_copper_gutter_inner",
       "y": 90,
       "uvlock": true
     },
-    "facing=east,shape=inner_left": {
-      "model": "fixfoot:block/weathered_copper_gutter_inner"
-    },
-    "facing=east,shape=outer_right": {
-      "model": "fixfoot:block/weathered_copper_gutter_outer",
+    "facing=east,shape=tight": {
+      "model": "fixfoot:block/weathered_copper_gutter_tight",
       "y": 90,
       "uvlock": true
     },
-    "facing=east,shape=outer_left": {
-      "model": "fixfoot:block/weathered_copper_gutter_outer"
+    "facing=east,shape=wide": {
+      "model": "fixfoot:block/weathered_copper_gutter_wide",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=east,shape=tight_mirrored": {
+      "model": "fixfoot:block/weathered_copper_gutter_tight_mirrored",
+      "y": 90,
+      "uvlock": true
     },
     "facing=south,shape=straight": {
       "model": "fixfoot:block/weathered_copper_gutter",
       "y": 180,
       "uvlock": true
     },
-    "facing=south,shape=inner_right": {
+    "facing=south,shape=inner": {
       "model": "fixfoot:block/weathered_copper_gutter_inner",
       "y": 180,
       "uvlock": true
     },
-    "facing=south,shape=inner_left": {
-      "model": "fixfoot:block/weathered_copper_gutter_inner",
-      "y": 90,
-      "uvlock": true
-    },
-    "facing=south,shape=outer_right": {
-      "model": "fixfoot:block/weathered_copper_gutter_outer",
+    "facing=south,shape=tight": {
+      "model": "fixfoot:block/weathered_copper_gutter_tight",
       "y": 180,
       "uvlock": true
     },
-    "facing=south,shape=outer_left": {
-      "model": "fixfoot:block/weathered_copper_gutter_outer",
-      "y": 90,
+    "facing=south,shape=wide": {
+      "model": "fixfoot:block/weathered_copper_gutter_wide",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=south,shape=tight_mirrored": {
+      "model": "fixfoot:block/weathered_copper_gutter_tight_mirrored",
+      "y": 180,
       "uvlock": true
     },
     "facing=west,shape=straight": {
@@ -70,24 +70,24 @@
       "y": 270,
       "uvlock": true
     },
-    "facing=west,shape=inner_right": {
+    "facing=west,shape=inner": {
       "model": "fixfoot:block/weathered_copper_gutter_inner",
       "y": 270,
       "uvlock": true
     },
-    "facing=west,shape=inner_left": {
-      "model": "fixfoot:block/weathered_copper_gutter_inner",
-      "y": 180,
-      "uvlock": true
-    },
-    "facing=west,shape=outer_right": {
-      "model": "fixfoot:block/weathered_copper_gutter_outer",
+    "facing=west,shape=tight": {
+      "model": "fixfoot:block/weathered_copper_gutter_tight",
       "y": 270,
       "uvlock": true
     },
-    "facing=west,shape=outer_left": {
-      "model": "fixfoot:block/weathered_copper_gutter_outer",
-      "y": 180,
+    "facing=west,shape=wide": {
+      "model": "fixfoot:block/weathered_copper_gutter_wide",
+      "y": 270,
+      "uvlock": true
+    },
+    "facing=west,shape=tight_mirrored": {
+      "model": "fixfoot:block/weathered_copper_gutter_tight_mirrored",
+      "y": 270,
       "uvlock": true
     }
   }

@@ -1,5 +1,5 @@
 {
-  "parent": "fixfoot:block/gutter_base_outer",
+  "parent": "fixfoot:block/gutter_base_tight_mirrored",
   "textures": {
     "body": "minecraft:block/exposed_copper"
   }
