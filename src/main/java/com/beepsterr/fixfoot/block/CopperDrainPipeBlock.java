@@ -132,12 +132,15 @@ public class CopperDrainPipeBlock extends Block {
         BlockPos above = pos.above();
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockState gutter = level.getBlockState(above.relative(direction));
-            // Only a gutter whose channel runs along the side facing us. A gutter backs onto one
-            // wall of its block, so the channel sits on one side of it, and the collar reaches a
-            // fixed distance — far enough for the near side, never for the far one. Taking any
-            // gutter regardless left the collar pointing at a channel a whole block past its reach.
+            // Only a gutter with channel where the collar actually arrives. Two ways that fails.
+            // A gutter backs onto one wall of its block, so its channel sits on one side, and the
+            // collar reaches a fixed distance — far enough for the near side, never the far one.
+            // And the inner corner is a stub in one corner of its block: the collar lands mid-edge,
+            // which for that shape alone is open air. The other corners run channel straight
+            // through that point, and a downpipe on a corner is where you would want one anyway.
             if (CopperGutterBlock.isGutter(gutter)
-                    && gutter.getValue(CopperGutterBlock.FACING) == direction.getOpposite()) {
+                    && gutter.getValue(CopperGutterBlock.FACING) == direction.getOpposite()
+                    && gutter.getValue(CopperGutterBlock.SHAPE) != CopperGutterBlock.GutterShape.INNER) {
                 return state.setValue(CONNECTED, true).setValue(FACING, direction);
             }
         }
