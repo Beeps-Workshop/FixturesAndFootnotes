@@ -105,17 +105,33 @@ def apply(model, y):
     return {"model": model} if y == 0 else {"model": model, "y": y, "uvlock": True}
 
 
+# CopperGutterBlock.GutterShape -> the authored model it wears and how far that model is turned.
+# The turn is the shape's own, independent of the block's facing: five models cover nine shapes
+# because a corner turned is a different corner, and that independence is what lets the facing
+# stay exactly as the player placed it instead of being derived along with the shape.
+GUTTER_SHAPES = {
+    "straight":         ("", 0),
+    "left_front_near":  ("_inner", 0),
+    "left_front_far":   ("_tight", 0),
+    "left_back_near":   ("_tight", 270),
+    "left_back_far":    ("_wide", 0),
+    "right_front_near": ("_inner", 90),
+    "right_front_far":  ("_tight_mirrored", 0),
+    "right_back_near":  ("_tight_mirrored", 90),
+    "right_back_far":   ("_wide", 270),
+}
+
+
 def gutter_blockstate(stage_id):
     """
-    Twenty variants over five models, one per shape and facing. There are no mirrored corners to
-    author: a corner's handedness lives in the facing the block derives for itself, so the mirror
-    of any corner is the same model under a different facing.
+    Thirty-six variants over five models: nine shapes at four facings. The model is turned by the
+    shape's own rotation plus the facing's, which is the whole reason the facing can be left alone.
     """
     variants = {}
-    for facing, turn in TURNS.items():
-        for shape, part in (("straight", ""), ("inner", "_inner"), ("tight", "_tight"),
-                            ("wide", "_wide"), ("tight_mirrored", "_tight_mirrored")):
-            variants[f"facing={facing},shape={shape}"] = apply(f"{MODID}:block/{stage_id}{part}", turn)
+    for facing, facing_turn in TURNS.items():
+        for shape, (part, shape_turn) in GUTTER_SHAPES.items():
+            variants[f"facing={facing},shape={shape}"] = apply(
+                f"{MODID}:block/{stage_id}{part}", (facing_turn + shape_turn) % 360)
     return {"variants": variants}
 
 

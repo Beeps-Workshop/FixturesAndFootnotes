@@ -17,10 +17,24 @@ final class Facings {
 
     /** Takes a shape from the authored north-facing frame into a block facing {@code facing}. */
     static VoxelShape turn(VoxelShape shape, Direction facing) {
-        for (Direction from = Direction.NORTH; from != facing; from = from.getClockWise()) {
+        return turn(shape, quarters(facing));
+    }
+
+    /** As above, but by a count — for shapes turned independently of the block's facing. */
+    static VoxelShape turn(VoxelShape shape, int quarters) {
+        for (int i = Math.floorMod(quarters, 4); i > 0; i--) {
             shape = rotateClockwise(shape);
         }
         return shape;
+    }
+
+    /** Quarter turns clockwise from north, the same count the blockstate rotates a model by. */
+    static int quarters(Direction facing) {
+        int turns = 0;
+        for (Direction from = Direction.NORTH; from != facing; from = from.getClockWise()) {
+            turns++;
+        }
+        return turns;
     }
 
     /** Takes a direction from the authored north-facing frame into a block facing {@code facing}. */

@@ -60,33 +60,117 @@ public class CopperGutterBlock extends Block {
      * two — and it has no left/right pairs, because a corner's handedness is carried by which
      * facing the corner itself takes.
      */
+    /**
+     * Which piece this is. Nine values: the run passing through, and the eight ways it can turn.
+     *
+     * <p>A corner is fully described by three yes/no answers — which side the run arrives from,
+     * whether it leaves by the wall side or the open side, and whether it turns at the near end of
+     * the block or crosses to the far one. The flags are what the derivation works in; which model
+     * draws it, and how far that model is turned, is the generator's business.
+     *
+     * <p>Deliberately independent of {@link #FACING}. Tying a model's rotation to the block's facing
+     * is what forced the facing to be derived rather than placed, and deriving both is what made
+     * every gutter's state depend on its neighbours' — one run, one fixpoint, endlessly re-solving.
+     */
     public enum GutterShape implements StringRepresentable {
         STRAIGHT("straight"),
-        /** Turns out the front edge, toward a neighbour facing left. */
-        INNER("inner"),
-        /** Crosses the block, then turns out the front edge toward a neighbour facing right. */
-        TIGHT("tight"),
-        /** Crosses the block, then wraps out the back edge toward a neighbour facing right. */
-        WIDE("wide"),
-        /** {@link #TIGHT} mirrored: the same turn the other way round, which no facing can reach. */
-        TIGHT_MIRRORED("tight_mirrored");
+        LEFT_FRONT_NEAR("left_front_near", true, true, true),
+        LEFT_FRONT_FAR("left_front_far", true, true, false),
+        LEFT_BACK_NEAR("left_back_near", true, false, true),
+        LEFT_BACK_FAR("left_back_far", true, false, false),
+        RIGHT_FRONT_NEAR("right_front_near", false, true, true),
+        RIGHT_FRONT_FAR("right_front_far", false, true, false),
+        RIGHT_BACK_NEAR("right_back_near", false, false, true),
+        RIGHT_BACK_FAR("right_back_far", false, false, false);
 
         private final String name;
+        private final boolean corner;
+        private final boolean fromLeft;
+        private final boolean toFront;
+        private final boolean near;
 
         GutterShape(String name) {
             this.name = name;
+            this.corner = false;
+            this.fromLeft = false;
+            this.toFront = false;
+            this.near = false;
+        }
+
+        GutterShape(String name, boolean fromLeft, boolean toFront, boolean near) {
+            this.name = name;
+            this.corner = true;
+            this.fromLeft = fromLeft;
+            this.toFront = toFront;
+            this.near = near;
+        }
+
+        /**
+         * Whether channel runs across the middle of the block, which is where a drain pipe's collar
+         * arrives. A corner turning at the near end is done before it gets there, so a pipe below
+         * one has nothing to meet and stays a plain column.
+         */
+        public boolean carriesAcross() {
+            return !near;
+        }
+
+        /** The two sides this piece joins, for a block facing {@code facing}. */
+        public List<Direction> sides(Direction facing) {
+            Direction left = facing.getCounterClockWise();
+            Direction right = facing.getClockWise();
+            if (!corner) {
+                return List.of(left, right);
+            }
+            return List.of(fromLeft ? left : right, toFront ? facing : facing.getOpposite());
         }
 
         @Override
         public String getSerializedName() {
             return name;
         }
+
+        static GutterShape corner(boolean fromLeft, boolean toFront, boolean near) {
+            for (GutterShape shape : values()) {
+                if (shape.corner && shape.fromLeft == fromLeft
+                        && shape.toFront == toFront && shape.near == near) {
+                    return shape;
+                }
+            }
+            throw new IllegalStateException("no corner for " + fromLeft + " " + toFront + " " + near);
+        }
     }
 
-    /** Footprints against the north wall, tracing each authored model. */
+    /** Footprints of the authored models, un-turned, against the north wall. */
     private static final VoxelShape CHANNEL = box(0.0, 0.0, 0.0, 16.0, 2.0, 6.0);
     private static final VoxelShape CORNER = box(0.0, 0.0, 0.0, 6.0, 2.0, 6.0);
     private static final VoxelShape WRAP = Shapes.or(CHANNEL, box(10.0, 0.0, 0.0, 16.0, 2.0, 16.0));
+
+    /**
+     * Which footprint each shape wears and how far it is turned, matching what gen_drainage.py
+     * points the blockstate at. Five models cover nine shapes because a corner turned is a
+     * different corner — which is exactly what lets the facing stay as the player set it.
+     */
+    private static final Map<GutterShape, VoxelShape> FOOTPRINT = Map.of(
+            GutterShape.STRAIGHT, CHANNEL,
+            GutterShape.LEFT_FRONT_NEAR, CORNER,
+            GutterShape.LEFT_FRONT_FAR, CHANNEL,
+            GutterShape.LEFT_BACK_NEAR, CHANNEL,
+            GutterShape.LEFT_BACK_FAR, WRAP,
+            GutterShape.RIGHT_FRONT_NEAR, CORNER,
+            GutterShape.RIGHT_FRONT_FAR, CHANNEL,
+            GutterShape.RIGHT_BACK_NEAR, CHANNEL,
+            GutterShape.RIGHT_BACK_FAR, WRAP);
+
+    private static final Map<GutterShape, Integer> TURNS = Map.of(
+            GutterShape.STRAIGHT, 0,
+            GutterShape.LEFT_FRONT_NEAR, 0,
+            GutterShape.LEFT_FRONT_FAR, 0,
+            GutterShape.LEFT_BACK_NEAR, 3,
+            GutterShape.LEFT_BACK_FAR, 0,
+            GutterShape.RIGHT_FRONT_NEAR, 1,
+            GutterShape.RIGHT_FRONT_FAR, 0,
+            GutterShape.RIGHT_BACK_NEAR, 1,
+            GutterShape.RIGHT_BACK_FAR, 3);
 
     private final Map<BlockState, VoxelShape> shapes;
 
@@ -114,12 +198,9 @@ public class CopperGutterBlock extends Block {
     }
 
     private static VoxelShape calculateShape(BlockState state) {
-        VoxelShape shape = switch (state.getValue(SHAPE)) {
-            case STRAIGHT, TIGHT, TIGHT_MIRRORED -> CHANNEL;
-            case INNER -> CORNER;
-            case WIDE -> WRAP;
-        };
-        return Facings.turn(shape, state.getValue(FACING));
+        GutterShape shape = state.getValue(SHAPE);
+        return Facings.turn(FOOTPRINT.get(shape),
+                TURNS.get(shape) + Facings.quarters(state.getValue(FACING)));
     }
 
     @Override
@@ -171,73 +252,50 @@ public class CopperGutterBlock extends Block {
     }
 
     /**
-     * Which neighbours each authored piece joins, described in the base (north-facing) frame as
-     * "a gutter on this side, backing onto that wall". Read straight off the models: the channel
-     * leaves a block edge at a fixed offset, and only one neighbour facing puts a channel there.
-     */
-    private record Link(Direction side, Direction backsOnto) {
-    }
-
-    private static final Map<GutterShape, List<Link>> LINKS = Map.of(
-            GutterShape.STRAIGHT, List.of(new Link(Direction.WEST, Direction.NORTH),
-                                          new Link(Direction.EAST, Direction.NORTH)),
-            GutterShape.INNER, List.of(new Link(Direction.WEST, Direction.NORTH),
-                                       new Link(Direction.NORTH, Direction.WEST)),
-            GutterShape.TIGHT, List.of(new Link(Direction.WEST, Direction.NORTH),
-                                       new Link(Direction.NORTH, Direction.EAST)),
-            GutterShape.WIDE, List.of(new Link(Direction.WEST, Direction.NORTH),
-                                      new Link(Direction.SOUTH, Direction.EAST)),
-            GutterShape.TIGHT_MIRRORED, List.of(new Link(Direction.EAST, Direction.NORTH),
-                                                new Link(Direction.NORTH, Direction.WEST)));
-
-    /**
-     * Works out which piece this is from the run around it, deriving facing as well as shape.
+     * Works out which piece this is, leaving {@link #FACING} exactly as it was placed.
      *
-     * <p>Every corner is tried at every facing rather than pattern-matched, because the corners are
-     * not mirror-symmetric: an L turning left is a different piece from one turning right, and only
-     * some of those mirrors happen to coincide with another corner under another facing. Searching
-     * finds whichever of the sixteen states actually joins the neighbours that are there.
+     * <p>Only two things are read, and both are the neighbours' facings — never a shape. Nothing
+     * here depends on a value a neighbour is deriving at the same moment, so there is no order to
+     * get right, nothing to deadlock, and a gutter placed across the room cannot re-solve this one.
+     *
+     * <p>A run passing straight through wins outright, which is the guard stairs use: a piece
+     * already joined on both sides has nothing left to turn with, so a third gutter arriving
+     * alongside cannot pull it round.
      */
     private static BlockState connect(BlockState state, BlockGetter level, BlockPos pos) {
-        for (GutterShape shape : List.of(GutterShape.INNER, GutterShape.TIGHT,
-                GutterShape.WIDE, GutterShape.TIGHT_MIRRORED)) {
-            for (Direction facing : Direction.Plane.HORIZONTAL) {
-                if (joins(shape, facing, level, pos)) {
-                    return state.setValue(FACING, facing).setValue(SHAPE, shape);
-                }
-            }
+        Direction facing = state.getValue(FACING);
+        Direction left = facing.getCounterClockWise();
+        Direction right = facing.getClockWise();
+
+        boolean fromLeft = continues(level, pos.relative(left), facing);
+        boolean fromRight = continues(level, pos.relative(right), facing);
+        // Both, or neither: either way there is no turn to make.
+        if (fromLeft == fromRight) {
+            return state.setValue(SHAPE, GutterShape.STRAIGHT);
         }
-        // Not a corner, so the facing the player placed it with stands.
+
+        for (boolean front : new boolean[] {true, false}) {
+            Direction exit = front ? facing : facing.getOpposite();
+            BlockState neighbour = level.getBlockState(pos.relative(exit));
+            if (!isGutter(neighbour)) {
+                continue;
+            }
+            // Where that gutter's channel meets the edge we share is set by the wall it backs onto,
+            // which tells us whether the turn happens at the near end of this block or the far one.
+            Direction other = neighbour.getValue(FACING);
+            if (other != left && other != right) {
+                continue;
+            }
+            return state.setValue(SHAPE,
+                    GutterShape.corner(fromLeft, front, (other == left) == fromLeft));
+        }
         return state.setValue(SHAPE, GutterShape.STRAIGHT);
     }
 
-    private static boolean joins(GutterShape shape, Direction facing, BlockGetter level, BlockPos pos) {
-        for (Link link : LINKS.get(shape)) {
-            Direction side = Facings.turn(link.side(), facing);
-            if (!linksBack(level, pos.relative(side), side.getOpposite(), Facings.turn(link.backsOnto(), facing))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Whether the gutter at {@code pos} can take a connection from {@code toUs} — it has to back
-     * onto the right wall for the channels to line up, and its own shape has to spend one of its
-     * links on us. A corner already using both of its links is full, so a run arriving at one is
-     * left as a straight rather than quietly stealing a connection the corner cannot return.
-     */
-    private static boolean linksBack(BlockGetter level, BlockPos pos, Direction toUs, Direction facing) {
+    /** A gutter carrying the same run: same wall, so its channel lines up with ours. */
+    private static boolean continues(BlockGetter level, BlockPos pos, Direction facing) {
         BlockState state = level.getBlockState(pos);
-        if (!isGutter(state) || state.getValue(FACING) != facing) {
-            return false;
-        }
-        for (Link link : LINKS.get(state.getValue(SHAPE))) {
-            if (Facings.turn(link.side(), facing) == toUs) {
-                return true;
-            }
-        }
-        return false;
+        return isGutter(state) && state.getValue(FACING) == facing;
     }
 
     /**
@@ -268,8 +326,8 @@ public class CopperGutterBlock extends Block {
             if (level.isRainingAt(pos.above())) {
                 return true;
             }
-            for (Link link : LINKS.get(state.getValue(SHAPE))) {
-                BlockPos linked = pos.relative(Facings.turn(link.side(), state.getValue(FACING)));
+            for (Direction side : state.getValue(SHAPE).sides(state.getValue(FACING))) {
+                BlockPos linked = pos.relative(side);
                 if (seen.add(linked)) {
                     queue.add(linked);
                 }
