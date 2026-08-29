@@ -1,9 +1,13 @@
 package com.beepsterr.fixfoot.entity;
 
 import java.util.List;
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -29,7 +33,8 @@ import net.minecraft.world.phys.Vec3;
  * short synched summary of the first {@link #previewCount()} stacks is what the renderer rests in
  * the mesh, so a stocked net reads as full at a glance without syncing an inventory per change.
  */
-public abstract class StorageNetEntity extends AttachedFixtureEntity implements Container, MenuProvider {
+public abstract class StorageNetEntity extends AttachedFixtureEntity
+        implements Container, MenuProvider, LootableFixture {
     /** Ceiling on synched preview stacks. Each net shows {@link #previewCount()} of them. */
     public static final int MAX_PREVIEW = 5;
 
@@ -47,6 +52,10 @@ public abstract class StorageNetEntity extends AttachedFixtureEntity implements 
             List.of(PREVIEW_0, PREVIEW_1, PREVIEW_2, PREVIEW_3, PREVIEW_4);
 
     private final NonNullList<ItemStack> items;
+
+    @Nullable
+    private ResourceKey<LootTable> lootTable;
+    private long lootSeed;
 
     protected StorageNetEntity(EntityType<? extends StorageNetEntity> type, Level level, int slots) {
         super(type, level);
@@ -114,6 +123,41 @@ public abstract class StorageNetEntity extends AttachedFixtureEntity implements 
     @Override
     public Component getDisplayName() {
         return getType().getDescription();
+    }
+
+    // --- Loot ---
+
+    @Override
+    @Nullable
+    public ResourceKey<LootTable> getFixtureLootTable() {
+        return lootTable;
+    }
+
+    @Override
+    public void setFixtureLootTable(@Nullable ResourceKey<LootTable> table) {
+        this.lootTable = table;
+    }
+
+    @Override
+    public long getFixtureLootSeed() {
+        return lootSeed;
+    }
+
+    @Override
+    public void setFixtureLootSeed(long seed) {
+        this.lootSeed = seed;
+    }
+
+    @Override
+    public void acceptLoot(LootTable table, LootParams params, long seed) {
+        // Straight to vanilla's own container fill, which scatters the stacks across random empty
+        // slots and occasionally splits one in two. Rolling the items ourselves and laying them in
+        // order gave a solid run from slot zero, which reads as generated rather than stocked.
+        //
+        // Over-rolling is vanilla's problem to report now: fill logs a warning and discards the
+        // excess rather than dropping it at the fixture's feet.
+        table.fill(this, params, seed);
+        updatePreview();
     }
 
     @Override

@@ -4,8 +4,12 @@ import com.beepsterr.fixfoot.registry.ModEntities;
 import com.beepsterr.fixfoot.registry.ModItems;
 import java.util.Collections;
 import java.util.List;
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -50,7 +54,7 @@ import net.minecraft.world.phys.Vec3;
  * <p>The slots live in {@link SynchedEntityData}, so the client gets them for free — the renderer
  * reads exactly what an interaction writes, with no extra packets.
  */
-public class WidePlanterEntity extends AttachedFixtureEntity {
+public class WidePlanterEntity extends AttachedFixtureEntity implements LootableFixture {
     public static final int SLOTS = 3;
 
     /** Across the wall, tall, and standing out of the wall — in blocks. */
@@ -68,6 +72,10 @@ public class WidePlanterEntity extends AttachedFixtureEntity {
     private static final EntityDataAccessor<ItemStack> PLANT_2 =
             SynchedEntityData.defineId(WidePlanterEntity.class, EntityDataSerializers.ITEM_STACK);
     private static final List<EntityDataAccessor<ItemStack>> PLANTS = List.of(PLANT_0, PLANT_1, PLANT_2);
+
+    @Nullable
+    private ResourceKey<LootTable> lootTable;
+    private long lootSeed;
 
     public WidePlanterEntity(EntityType<? extends WidePlanterEntity> type, Level level) {
         super(type, level);
@@ -108,6 +116,55 @@ public class WidePlanterEntity extends AttachedFixtureEntity {
 
     public void setPlant(int slot, ItemStack stack) {
         entityData.set(PLANTS.get(slot), stack);
+    }
+
+    // --- Loot ---
+
+    @Override
+    @Nullable
+    public ResourceKey<LootTable> getFixtureLootTable() {
+        return lootTable;
+    }
+
+    @Override
+    public void setFixtureLootTable(@Nullable ResourceKey<LootTable> table) {
+        this.lootTable = table;
+    }
+
+    @Override
+    public long getFixtureLootSeed() {
+        return lootSeed;
+    }
+
+    @Override
+    public void setFixtureLootSeed(long seed) {
+        this.lootSeed = seed;
+    }
+
+    /**
+     * Plants what it can and throws away the rest — the reason this mod owns {@link LootableFixture}
+     * rather than implementing vanilla's container-shaped interface.
+     *
+     * <p>Anything unplantable is discarded rather than dropped on the floor. A planter isn't storage,
+     * and a shed's loot table that also rolls tools shouldn't leave the tools lying in the dirt; the
+     * table is expected to describe what could be *growing* here, not what fell out.
+     *
+     * <p>Each slot takes a single item the way hand-planting does, so a rolled stack of six saplings
+     * fills one slot with one sapling, not six.
+     */
+    @Override
+    public void acceptLoot(LootTable table, LootParams params, long seed) {
+        // Rolls rather than fills: LootTable#fill needs a Container, and three synched slots behind
+        // a plantable filter is not one.
+        int slot = 0;
+        for (ItemStack stack : table.getRandomItems(params, seed)) {
+            if (slot >= PLANTS.size()) {
+                break;
+            }
+            if (isPlantable(stack)) {
+                setPlant(slot++, stack.copyWithCount(1));
+            }
+        }
     }
 
     /** Flowers, saplings, crops, and the odd plants that fit none of those categories. */

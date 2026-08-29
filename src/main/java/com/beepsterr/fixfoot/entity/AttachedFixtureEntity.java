@@ -2,9 +2,17 @@ package com.beepsterr.fixfoot.entity;
 
 import java.util.Objects;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -173,7 +181,46 @@ public abstract class AttachedFixtureEntity extends HangingEntity {
             remeasureTimer = 100;
             recalculateBoundingBox();
         }
+        rollLoot();
         super.tick();
+    }
+
+    // --- Loot ---
+
+    /**
+     * Fills a {@link LootableFixture} from its pending table, once, on the first server tick after
+     * it arrives — whether that's structure generation or a chunk loading off disk.
+     *
+     * <p>On load rather than on first open, unlike vanilla containers. A chest can defer because its
+     * contents are hidden until opened; these fixtures render what they hold, so a deferred roll
+     * would show an empty planter that visibly sprouts the moment a player clicked it.
+     *
+     * <p>Clearing the table afterwards is what makes it happen once: an already-rolled fixture saves
+     * without the tag and so never rolls again.
+     */
+    private void rollLoot() {
+        if (level().isClientSide || !(this instanceof LootableFixture fixture)) {
+            return;
+        }
+        ResourceKey<LootTable> table = fixture.getFixtureLootTable();
+        if (table == null) {
+            return;
+        }
+        fixture.setFixtureLootTable(null);
+
+        ServerLevel server = (ServerLevel) level();
+        // ORIGIN only. Vanilla containers also pass THIS_ENTITY, but there it means *the player who
+        // opened the chest* — it carries their luck. Rolling on load there is no player, and passing
+        // the fixture itself would quietly change what `entity_properties: this` matches for anyone
+        // writing a table. Position is all the context an unattended roll honestly has.
+        LootParams params = new LootParams.Builder(server)
+                .withParameter(LootContextParams.ORIGIN, position())
+                .create(LootContextParamSets.CHEST);
+        // Never name LootContextParamSet/LootContextParam as types here. Both were renamed in
+        // 1.21.4 (to ContextKeySet/ContextKey) while the static fields above kept their names, so
+        // touching only the fields keeps this one source file compiling on both nodes unchanged.
+        fixture.acceptLoot(server.getServer().reloadableRegistries().getLootTable(table),
+                params, fixture.getFixtureLootSeed());
     }
 
     // --- Breaking ---
@@ -239,12 +286,27 @@ public abstract class AttachedFixtureEntity extends HangingEntity {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putByte("Facing", (byte) direction.get3DDataValue());
+        // Same tag names vanilla containers use, so `/data merge entity` reads the same either way
+        // and anyone who has set loot on a chest already knows the spelling.
+        if (this instanceof LootableFixture fixture && fixture.getFixtureLootTable() != null) {
+            tag.putString("LootTable", fixture.getFixtureLootTable().location().toString());
+            if (fixture.getFixtureLootSeed() != 0L) {
+                tag.putLong("LootTableSeed", fixture.getFixtureLootSeed());
+            }
+        }
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         setDirection(Direction.from3DDataValue(tag.getByte("Facing")));
+        if (this instanceof LootableFixture fixture && tag.contains("LootTable", Tag.TAG_STRING)) {
+            ResourceLocation id = ResourceLocation.tryParse(tag.getString("LootTable"));
+            // tryParse returns null on a malformed id rather than throwing. Dropping it silently
+            // beats killing the entity load over a typo in someone's structure NBT.
+            fixture.setFixtureLootTable(id == null ? null : ResourceKey.create(Registries.LOOT_TABLE, id));
+            fixture.setFixtureLootSeed(tag.getLong("LootTableSeed"));
+        }
     }
 
     @Override

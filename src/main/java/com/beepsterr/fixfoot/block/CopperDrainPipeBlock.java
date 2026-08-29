@@ -13,7 +13,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 //? if >=1.21.2 {
 /*import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 *///?}
 import net.minecraft.world.level.block.Block;
@@ -36,9 +35,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * than anything the pipes carry, so a pipe is only ever the path between the two.
  *
  * <p>Neither property is chosen by the player. {@link #CONNECTED} is true when a gutter sits one
- * block up and one block out — a roof overhangs the wall the pipe runs down, so the pipe tucks back
- * against that wall instead of hanging in the air under the eave. {@link #FACING} then points the
- * collar at whichever side that gutter was on. Both are recomputed when the block above changes, so
+ * block up and one block out, facing back this way — a roof overhangs the wall the pipe runs down,
+ * so the pipe tucks back against that wall instead of hanging in the air under the eave, and the
+ * collar can only reach a channel on the near side of that gutter's block. {@link #FACING} then
+ * points the collar at whichever side that gutter was on. Both are recomputed when the block above changes, so
  * stacking a pipe under an existing one quietly demotes the old top section back to plain column.
  */
 public class CopperDrainPipeBlock extends Block {
@@ -131,7 +131,13 @@ public class CopperDrainPipeBlock extends Block {
     static BlockState connect(BlockState state, LevelReader level, BlockPos pos) {
         BlockPos above = pos.above();
         for (Direction direction : Direction.Plane.HORIZONTAL) {
-            if (CopperGutterBlock.isGutter(level.getBlockState(above.relative(direction)))) {
+            BlockState gutter = level.getBlockState(above.relative(direction));
+            // Only a gutter whose channel runs along the side facing us. A gutter backs onto one
+            // wall of its block, so the channel sits on one side of it, and the collar reaches a
+            // fixed distance — far enough for the near side, never for the far one. Taking any
+            // gutter regardless left the collar pointing at a channel a whole block past its reach.
+            if (CopperGutterBlock.isGutter(gutter)
+                    && gutter.getValue(CopperGutterBlock.FACING) == direction.getOpposite()) {
                 return state.setValue(CONNECTED, true).setValue(FACING, direction);
             }
         }
