@@ -42,5 +42,6 @@ biome like ordinary vines.
 
 ## Crafting
 Slats are cut on a **stonecutter**, eight at a time. A log cuts into all three of that wood's slat
-variants directly, so you don't have to strip or plank it first; stripped logs and planks each cut
-into their own.
+variants directly, so you don't have to strip or plank it first. Cutting a log into plank slats
+gives 32, the same as the four planks it would make. Stripped logs and planks each cut into their
+own.

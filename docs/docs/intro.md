@@ -28,6 +28,8 @@ and it sits flush against the surface rather than floating a block away.
   partition.
 - **[Sheetmetal](./Blocks/Sheetmetal.md)**: Corrugated copper and iron that rotates to face you, so
   runs of it line up into patterns.
+- **[Gutters](./Blocks/Gutters.md)**: Copper gutters, drain pipes and drains that catch the rain off
+  your roof and pour it into a basin or cauldron.
 
 ![All the slats](https://cdn.modrinth.com/data/giBTRDbb/images/2c40d95c10d78d5a5de8607a563c3ebb8dd6cdc2.png)
 
