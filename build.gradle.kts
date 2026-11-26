@@ -54,6 +54,22 @@ java {
     sourceCompatibility = java
 }
 
+// 1.21.2 dropped the object form of a recipe ingredient: {"item": "minecraft:oak_log"} no longer
+// parses and has to be the bare id "minecraft:oak_log". 1.21.1 only accepts the object form, so the
+// sources stay in it and newer nodes rewrite their copy. Every ingredient here is a single item —
+// no tags, no lists of alternatives — which is all this pattern handles; a recipe result is keyed
+// "id", not "item", so it is never touched.
+if (stonecutter.eval(minecraft, ">=1.21.2")) {
+    tasks.processResources {
+        val itemIngredient = Regex("""\{\s*"item"\s*:\s*("[^"]+")\s*}""")
+        doLast {
+            destinationDir.resolve("data").walk()
+                .filter { it.isFile && it.extension == "json" && it.parentFile.name == "recipe" }
+                .forEach { it.writeText(itemIngredient.replace(it.readText(), "$1")) }
+        }
+    }
+}
+
 tasks.build {
     group = "versioned"
     description = "Build the active version — run 'chiseledBuild' for all versions."
