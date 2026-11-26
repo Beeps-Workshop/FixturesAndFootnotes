@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
@@ -25,7 +27,7 @@ let withWorkshop: (config: Config, opts: {projectId?: string; right?: typeof rig
     ...config.themeConfig,
     navbar: {
       title: 'Fixtures & Footnotes',
-      items: (opts.right ?? []).map((item) => ({...item, position: 'right' as const})),
+      items: [{type: 'docsVersionDropdown', position: 'right'}, ...(opts.right ?? []).map((item) => ({...item, position: 'right' as const}))],
     },
     footer: {style: 'dark', copyright: `Copyright © ${new Date().getFullYear()} Beeps' Workshop.`},
   } satisfies Preset.ThemeConfig,
@@ -33,6 +35,15 @@ let withWorkshop: (config: Config, opts: {projectId?: string; right?: typeof rig
 if (shared) {
   ({withWorkshop} = require(shared));
 }
+
+// The last released version is served by default; the editable current docs are the unreleased
+// "Snapshots". Cut a new version with:  npm run docusaurus docs:version <version>
+const lastVersion = '1.0.0';
+
+// Only the default (last released) version is indexed. Every other version is a near-identical copy
+// of the same page at a different URL, so leaving them crawlable splits ranking signals and risks an
+// old version outranking the current one.
+const frozen: string[] = JSON.parse(fs.readFileSync(path.join(__dirname, 'versions.json'), 'utf8'));
 
 export default withWorkshop(
   {
@@ -61,6 +72,11 @@ export default withWorkshop(
             // (versioned_docs/version-x/...).
             editUrl: ({versionDocsDirPath, docPath}) =>
               `https://github.com/Beeps-Workshop/FixturesAndFootnotes/edit/main/docs/${versionDocsDirPath}/${docPath}`,
+            lastVersion,
+            versions: {
+              current: {label: 'Snapshots', banner: 'unreleased', noIndex: true},
+              ...Object.fromEntries(frozen.filter((v) => v !== lastVersion).map((v) => [v, {noIndex: true}])),
+            },
           },
           blog: false,
         } satisfies Preset.Options,
