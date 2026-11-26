@@ -4,6 +4,7 @@ plugins {
     id("dev.architectury.loom")
     id("architectury-plugin")
     id("com.gradleup.shadow")
+    `maven-publish`
 }
 
 val loader = prop("loom.platform")!!
@@ -12,6 +13,7 @@ val common: Project = requireNotNull(stonecutter.node.sibling("")?.project) {
     "No common project for $project"
 }
 
+group = mod.group
 version = "${mod.version}+$minecraft"
 base {
     archivesName.set("${mod.id}-$loader")
@@ -112,4 +114,22 @@ tasks.register<Copy>("buildAndCollect") {
     from(tasks.remapJar.get().archiveFile, tasks.remapSourcesJar.get().archiveFile)
     into(rootProject.layout.buildDirectory.file("libs/${mod.version}/$loader"))
     dependsOn("build")
+}
+
+// For addon mods (Fixtures & Footnotes & Structures) to develop against an unreleased build:
+// `publishToMavenLocal` puts this node in ~/.m2 as com.beepsterr.fixfoot:fixfoot-fabric:<ver>+<mc>.
+// Nothing here reaches a remote — there is no repositories {} block, so mavenLocal is the only sink.
+//
+// Artifacts are listed explicitly rather than via components["java"] on purpose. The component
+// would carry a POM full of transitive deps (Fabric API, Architectury, MixinExtras), and consumers
+// pull this in through Loom's `modLocalRuntime`, which wants the jar and nothing else. Publishing
+// bare artifacts keeps a stray transitive from landing on an addon's classpath.
+publishing {
+    publications {
+        create<MavenPublication>("mod") {
+            artifactId = base.archivesName.get()
+            artifact(tasks.remapJar)
+            artifact(tasks.remapSourcesJar) { classifier = "sources" }
+        }
+    }
 }

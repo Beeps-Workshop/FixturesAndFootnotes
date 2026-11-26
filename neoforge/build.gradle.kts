@@ -4,6 +4,7 @@ plugins {
     id("dev.architectury.loom")
     id("architectury-plugin")
     id("com.gradleup.shadow")
+    `maven-publish`
 }
 
 val loader = prop("loom.platform")!!
@@ -12,6 +13,7 @@ val common: Project = requireNotNull(stonecutter.node.sibling("")?.project) {
     "No common project for $project"
 }
 
+group = mod.group
 version = "${mod.version}+$minecraft"
 base {
     archivesName.set("${mod.id}-$loader")
@@ -117,4 +119,16 @@ tasks.register<Copy>("buildAndCollect") {
     from(tasks.remapJar.get().archiveFile, tasks.remapSourcesJar.get().archiveFile)
     into(rootProject.layout.buildDirectory.file("libs/${mod.version}/$loader"))
     dependsOn("build")
+}
+
+// See the matching block in fabric/build.gradle.kts for why this publishes bare artifacts
+// instead of components["java"].
+publishing {
+    publications {
+        create<MavenPublication>("mod") {
+            artifactId = base.archivesName.get()
+            artifact(tasks.remapJar)
+            artifact(tasks.remapSourcesJar) { classifier = "sources" }
+        }
+    }
 }
